@@ -116,7 +116,7 @@ impl StreamHandler<ws::Message, ws::ProtocolError> for OPCUASession {
                 ctx.pong(&msg);
             }
             ws::Message::Pong(_) => {
-                self.hb = Instant::now();
+                self.hb = Instant::now(); //心跳检测
             }
             ws::Message::Text(msg) => {
                 let msg = msg.trim();
@@ -222,16 +222,17 @@ impl OPCUASession {
         if args.len() != 3 {
             return;
         }
-
+        println!("args={:?}",args);
         if let Some(ref mut session) = self.session {
             let mut session = session.write().unwrap();
 
             let event_node_id = NodeId::from_str(args.get(0).unwrap());
+
             if event_node_id.is_err() {
                 return;
             }
             let event_node_id = event_node_id.unwrap();
-
+            println!("event_node_id={}",event_node_id);
             let where_clause = args.get(1).unwrap();
             let where_clause = if where_clause.is_empty() {
                 ContentFilter {
@@ -271,7 +272,7 @@ impl OPCUASession {
             };
 
             // Select clauses
-            let select_criteria = args.get(4).unwrap();
+            let select_criteria = args.get(2).unwrap();
             let select_clauses = Some(select_criteria.split("|").map(|s| {
                 SimpleAttributeOperand {
                     type_definition_id: ObjectTypeId::BaseEventType.into(),
@@ -289,8 +290,9 @@ impl OPCUASession {
             let addr_for_events = ctx.address();
             let event_callback = EventCallback::new(move |events| {
                 // Handle events
+                println!("received add_event={:?}",events);
                 let events = events.events.unwrap();
-                addr_for_events.do_send(Event::Event(events));
+                addr_for_events.do_send(Event::Event(events)); //通知页面显示
             });
 
             // create a subscription containing events
@@ -306,11 +308,11 @@ impl OPCUASession {
             }
         }
     }
-
+    //按钮 Subscribe to data change
     fn subscribe(&mut self, ctx: &mut <Self as Actor>::Context, node_ids: Vec<String>) {
         if let Some(ref mut session) = self.session {
             // Create a subscription
-            println!("Creating subscription");
+            println!("Creating subscription,node_ids={:?}",node_ids);
 
             // This scope is important - we don't want to session to be locked when the code hits the
             // loop below
@@ -340,6 +342,7 @@ impl OPCUASession {
                     // Create some monitored items
                     let items_to_create: Vec<MonitoredItemCreateRequest> = node_ids.iter().map(|node_id| {
                         let node_id = NodeId::from_str(node_id).unwrap(); // Trust client to not break this
+                        println!("node_id={}",node_id);
                         node_id.into()
                     }).collect();
                     let _results = session.create_monitored_items(subscription_id, TimestampsToReturn::Both, &items_to_create);

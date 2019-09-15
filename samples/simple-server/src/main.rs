@@ -63,6 +63,7 @@ fn add_example_variables(server: &mut Server) {
             let mut counter = 0;
             let getter = AttrFnGetter::new(move |_, _, _| -> Result<Option<DataValue>, StatusCode> {
                 counter += 1;
+                println!("call v3 getter: {}",counter);
                 Ok(Some(DataValue::new(UAString::from(format!("Hello World times {}", counter)))))
             });
             v.set_value_getter(Arc::new(Mutex::new(getter)));
@@ -76,6 +77,7 @@ fn add_example_variables(server: &mut Server) {
             let getter = AttrFnGetter::new(move |_, _, _| -> Result<Option<DataValue>, StatusCode> {
                 let elapsed = Utc::now().signed_duration_since(start_time).num_milliseconds();
                 let moment = (elapsed % 10000) as f64 / 10000.0;
+                println!("call v4 geter:{}",moment);
                 Ok(Some(DataValue::new((2.0 * consts::PI * moment).sin())))
             });
             v.set_value_getter(Arc::new(Mutex::new(getter)));
@@ -88,12 +90,17 @@ fn add_example_variables(server: &mut Server) {
     {
         // Store a counter and a flag in a tuple
         let data = Arc::new(Mutex::new((0, true)));
+        /*
+        这是让服务器定时来抓取数据的,v1,v2修改间隔是300ms,
+        因为服务器这边变得很频繁,但是客户端是2秒查询一次,导致开关量v2的变化会丢失
+        */
         server.add_polling_action(300, move || {
             let mut data = data.lock().unwrap();
             data.0 += 1;
             data.1 = !data.1;
             let mut address_space = address_space.write().unwrap();
             let now = DateTime::now();
+            println!("v1 changed to {},v2 changed to {}",data.0,data.1);
             let _ = address_space.set_variable_value(v1_node.clone(), data.0 as i32, &now, &now);
             let _ = address_space.set_variable_value(v2_node.clone(), data.1, &now, &now);
         });

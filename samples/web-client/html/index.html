@@ -168,7 +168,7 @@
         </tr>
         <tr>
             <td><input id="subscribe_values"
-                       value="ns=2;s=BooleanDynamic,ns=2;s=Int16Dynamic,ns=2;s=StringDynamic,ns=2;s=DoubleDynamic"/>
+                       value="ns=2;s=v1,ns=2;s=v2,ns=2;s=v3,ns=2;s=v4"/>
             </td>
             <td>
                 <button disabled="disabled" id="subscribe_btn" onclick="subscribe($('#subscribe_values').val())">
@@ -214,7 +214,7 @@
     <table>
         <tr>
             <th>Event source:</th>
-            <td colspan="3"><input id="event_source_id" value="ns=2;s=Machine 1"/></td>
+            <td colspan="3"><input id="event_source_id" value="ns=2;s=v1"/></td>
         </tr>
         <tr>
             <th>Where the event matches this criteria:</th>
@@ -228,13 +228,13 @@
                     <option value="Severity">Severity</option>
                 </select>
                 <select id="operator">
-                    <option value="eq">==</option>
+                    <option value="eq" selected="selected">==</option>
                     <option value="lt">&lt;</option>
                     <option value="gt">&gt;</option>
                     <option value="lte">&lt;=</option>
                     <option value="gte">&lt;=</option>
-                    <option value="like" selected="selected">LIKE</option>
-                </select><input id="right_operand" value="Machine%"/>
+                    <option value="like" >LIKE</option>
+                </select><input id="right_operand" value="v1"/>
             </td>
         </tr>
         <tr>

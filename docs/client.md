@@ -237,9 +237,9 @@ This makes the client API easy to use.
 Under the covers, all calls are actually asynchronous. Requests are dispatched and responses are handled asynchronously
 but the client waits for the response it is expecting. 
 
-The only exception to this are publish requests and responses which are always asynchronous. These are handled
+**The only exception to this are publish requests and responses which are always asynchronous. These are handled
 internally by the API from timers. If a publish response contains changes from a subscription, the subscription's
-registered callback will be called asynchronously from another thread. 
+registered callback will be called asynchronously from another thread.**
 
 ### Calling a service
 

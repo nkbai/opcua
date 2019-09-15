@@ -36,7 +36,7 @@ fn main() {
     if let Ok(session) = client.connect_to_endpoint((url.as_ref(), SecurityPolicy::None.to_str(), MessageSecurityMode::None, UserTokenPolicy::anonymous()), IdentityToken::Anonymous) {
         if let Err(result) = subscribe_to_variables(session.clone()) {
             println!("ERROR: Got an error while subscribing to variables - {}", result);
-        } else {
+        } else { //这种写法清晰么? err return 不更好么
             // Loops forever. The publish thread will call the callback with changes on the variables
             let _ = Session::run(session);
         }
@@ -45,7 +45,7 @@ fn main() {
 
 fn subscribe_to_variables(session: Arc<RwLock<Session>>) -> Result<(), StatusCode> {
     let mut session = session.write().unwrap();
-    // Creates a subscription with a data change callback
+    // Creates a subscription with a data change callback 间隔是两秒
     let subscription_id = session.create_subscription(2000.0, 10, 30, 0, 0, true, DataChangeCallback::new(|changed_monitored_items| {
         println!("Data change from server:");
         changed_monitored_items.iter().for_each(|item| print_value(item));
@@ -54,7 +54,11 @@ fn subscribe_to_variables(session: Arc<RwLock<Session>>) -> Result<(), StatusCod
 
     // Create some monitored items
     let items_to_create: Vec<MonitoredItemCreateRequest> = ["v1", "v2", "v3", "v4"].iter()
-        .map(|v| NodeId::new(2, *v).into()).collect();
+        .map(|v|{
+         let n=   NodeId::new(2, *v);
+            println!("nodeid={}",n);
+         n.into()
+        }).collect();
     let _ = session.create_monitored_items(subscription_id, TimestampsToReturn::Both, &items_to_create)?;
 
     Ok(())

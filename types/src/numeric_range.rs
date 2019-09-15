@@ -73,12 +73,12 @@ fn valid_numeric_ranges() {
         ]), "0:1,2,3,0:4,5,6,7,8,0:9")
     ];
     for vr in valid_ranges {
-        let range = vr.0.parse::<NumericRange>();
-        if range.is_err() {
-            println!("Range {} is in error when it should be ok", vr.0);
-        }
-        assert!(range.is_ok());
-        assert_eq!(range.unwrap(), vr.1);
+        let range:NumericRange = vr.0.parse().unwrap();
+//        if range.is_err() {
+//            println!("Range {} is in error when it should be ok", vr.0);
+//        }
+//        assert!(range.is_ok());
+        assert_eq!(range, vr.1);
         assert_eq!(vr.2, &vr.1.as_string());
     }
 }
