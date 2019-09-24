@@ -8,7 +8,7 @@ use opcua_types::ByteString;
 pub struct Thumbprint {
     /// Thumbprint is relatively small and fixed size, so use array to hold value instead of a vec
     /// just to save heap
-    value: [u8; Thumbprint::THUMBPRINT_SIZE],
+    value: [u8; Thumbprint::THUMBPRINT_SIZE], //指纹hash
 }
 
 impl Into<ByteString> for Thumbprint {

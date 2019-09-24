@@ -7,6 +7,7 @@ use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use env_logger::{Builder, Color};
+use log::LevelFilter;
 
 pub fn init() {
     lazy_static! {
@@ -44,6 +45,7 @@ pub fn init() {
 
             writeln!(buf, "{} - {} - {} - {}", time_fmt, style.value(record.level()), record.target(), record.args())
         });
+//        builder.filter(None,LevelFilter::Debug); 强制log Leve,替换环境变量控制的
         builder.init();
         info!("Logging is enabled, use RUST_OPCUA_LOG environment variable to control filtering, logging level");
     }

@@ -16,7 +16,7 @@ pub struct AesKey {
 }
 
 /// This allows key to be transferred between threads
-unsafe impl Send for AesKey {}
+//unsafe impl Send for AesKey {} //todo 这个地方似乎不需要 impl Send,可以考虑提一个pr
 
 impl AesKey {
     pub fn new(security_policy: SecurityPolicy, value: &[u8]) -> AesKey {
