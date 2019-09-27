@@ -1,10 +1,11 @@
 //! Asymmetric encryption / decryption, signing / verification wrapper.
-use std;
-use std::marker::Send;
-use std::fmt::{Debug, Formatter};
-use std::result::Result;
+use std::{
+    self,
+    fmt::{Debug, Formatter},
+    result::Result,
+};
 
-use openssl::{pkey, rsa, sign, hash};
+use openssl::{hash, pkey, rsa, sign};
 
 use opcua_types::status_code::StatusCode;
 
@@ -41,8 +42,6 @@ impl<T> Debug for PKey<T> {
         write!(f, "[pkey]")
     }
 }
-
-unsafe impl<T> Send for PKey<T> {}
 
 pub trait KeySize {
     fn bit_length(&self) -> usize;
