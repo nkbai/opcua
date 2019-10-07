@@ -304,7 +304,7 @@ impl Session {
                 info!("Recreating subscription {}", subscription_id);
                 // Remove the subscription data, create it again from scratch
                 let deleted_subscription = {
-                    let mut subscription_state = trace_write_lock_unwrap!(subscription_state);
+                    let mut subscription_state = subscription_state.write().unwrap(); // trace_write_lock_unwrap!(subscription_state);
                     subscription_state.delete_subscription(*subscription_id)
                 };
 

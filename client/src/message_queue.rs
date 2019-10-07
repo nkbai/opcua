@@ -3,16 +3,20 @@ use std::collections::{HashSet, HashMap};
 use futures::sync::mpsc::{self, UnboundedReceiver, UnboundedSender};
 
 use opcua_types::*;
-
+/**
+这个单纯就是一个管理消息发送与接收的辅助结构
+记录发送,
+收到以后交到这里,如果是没有对应的发送消息,会被丢弃
+*/
 pub(crate) struct MessageQueue {
     /// The requests that are in-flight, defined by their request handle and an async flag. Basically,
     /// the sent requests reside here until the response returns at which point the entry is removed.
     /// If a response is received for which there is no entry, the response will be discarded.
-    inflight_requests: HashSet<(u32, bool)>,
+    inflight_requests: HashSet<(u32, bool)>, //记录还没有处理的消息,正在处理的,这是一个set,其中u32是消息id,bool是表示异步还是同步
     /// A map of incoming responses waiting to be processed
     responses: HashMap<u32, (SupportedMessage, bool)>,
     /// This is the queue that messages will be sent onto the transport for sending
-    sender: Option<UnboundedSender<Message>>,
+    sender: Option<UnboundedSender<Message>>, //真正存放发送消息的地方
 }
 
 pub enum Message {
@@ -35,6 +39,8 @@ impl MessageQueue {
     }
 
     // Creates the transmission queue that outgoing requests will be sent over
+    //todo 这个api 感觉设计的并不合理,可能会反复创建sender,receiver,是没必要的,应该是初始化的时候就够早好
+    /// 自己保留了一份sender用于发送正常消息,返回的则是用于其他人发送退出信号
     pub(crate) fn make_request_channel(&mut self) -> (UnboundedSender<Message>, UnboundedReceiver<Message>) {
         let (tx, rx) = mpsc::unbounded::<Message>();
         self.sender = Some(tx.clone());

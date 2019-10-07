@@ -9,6 +9,10 @@ extern crate tempdir;
 extern crate serde_derive;
 #[macro_use]
 extern crate lazy_static;
+/*
+为了方便阅读,不追求性能,
+使用inline函数而不是宏来解决调试信息问题
+*/
 
 // A convenience macro for deadlocks.
 

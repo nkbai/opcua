@@ -17,7 +17,7 @@ use crate::{
 macro_rules! supported_messages_enum {
     [ $( $x:ident, ) * ] => (supported_messages_enum![ $( $x ),* ];);
     [ $( $x:ident ), * ] => {
-        #[derive(Debug, PartialEq, Clone)]
+//        #[derive(Debug, PartialEq, Clone)]
         pub enum SupportedMessage {
             /// An invalid request / response of some form
             Invalid(ObjectId),
@@ -369,6 +369,7 @@ impl SupportedMessage {
 }
 
 // These are all the messages handled into and out of streams by the OPCUA server / client code
+/*
 supported_messages_enum![
     ServiceFault,
     OpenSecureChannelRequest,
@@ -438,3 +439,683 @@ supported_messages_enum![
     CallRequest,
     CallResponse,
 ];
+*/
+#[derive(Debug, PartialEq, Clone)]
+pub enum SupportedMessage {
+    /// An invalid request / response of some form
+    Invalid(ObjectId),
+    /// Acknowledge message
+    AcknowledgeMessage(Box<AcknowledgeMessage>),
+    /// Other messages
+    ServiceFault(Box<ServiceFault>),
+    OpenSecureChannelRequest(Box<OpenSecureChannelRequest>),
+    OpenSecureChannelResponse(Box<OpenSecureChannelResponse>),
+    CloseSecureChannelRequest(Box<CloseSecureChannelRequest>),
+    CloseSecureChannelResponse(Box<CloseSecureChannelResponse>),
+    GetEndpointsRequest(Box<GetEndpointsRequest>),
+    GetEndpointsResponse(Box<GetEndpointsResponse>),
+    FindServersRequest(Box<FindServersRequest>),
+    FindServersResponse(Box<FindServersResponse>),
+    RegisterServerRequest(Box<RegisterServerRequest>),
+    RegisterServerResponse(Box<RegisterServerResponse>),
+    CreateSessionRequest(Box<CreateSessionRequest>),
+    CreateSessionResponse(Box<CreateSessionResponse>),
+    CloseSessionRequest(Box<CloseSessionRequest>),
+    CloseSessionResponse(Box<CloseSessionResponse>),
+    CancelRequest(Box<CancelRequest>),
+    CancelResponse(Box<CancelResponse>),
+    ActivateSessionRequest(Box<ActivateSessionRequest>),
+    ActivateSessionResponse(Box<ActivateSessionResponse>),
+    AddNodesRequest(Box<AddNodesRequest>),
+    AddNodesResponse(Box<AddNodesResponse>),
+    AddReferencesRequest(Box<AddReferencesRequest>),
+    AddReferencesResponse(Box<AddReferencesResponse>),
+    DeleteNodesRequest(Box<DeleteNodesRequest>),
+    DeleteNodesResponse(Box<DeleteNodesResponse>),
+    DeleteReferencesRequest(Box<DeleteReferencesRequest>),
+    DeleteReferencesResponse(Box<DeleteReferencesResponse>),
+    CreateMonitoredItemsRequest(Box<CreateMonitoredItemsRequest>),
+    CreateMonitoredItemsResponse(Box<CreateMonitoredItemsResponse>),
+    ModifyMonitoredItemsRequest(Box<ModifyMonitoredItemsRequest>),
+    ModifyMonitoredItemsResponse(Box<ModifyMonitoredItemsResponse>),
+    DeleteMonitoredItemsRequest(Box<DeleteMonitoredItemsRequest>),
+    DeleteMonitoredItemsResponse(Box<DeleteMonitoredItemsResponse>),
+    SetMonitoringModeRequest(Box<SetMonitoringModeRequest>),
+    SetMonitoringModeResponse(Box<SetMonitoringModeResponse>),
+    SetTriggeringRequest(Box<SetTriggeringRequest>),
+    SetTriggeringResponse(Box<SetTriggeringResponse>),
+    CreateSubscriptionRequest(Box<CreateSubscriptionRequest>),
+    CreateSubscriptionResponse(Box<CreateSubscriptionResponse>),
+    ModifySubscriptionRequest(Box<ModifySubscriptionRequest>),
+    ModifySubscriptionResponse(Box<ModifySubscriptionResponse>),
+    DeleteSubscriptionsRequest(Box<DeleteSubscriptionsRequest>),
+    DeleteSubscriptionsResponse(Box<DeleteSubscriptionsResponse>),
+    TransferSubscriptionsRequest(Box<TransferSubscriptionsRequest>),
+    TransferSubscriptionsResponse(Box<TransferSubscriptionsResponse>),
+    SetPublishingModeRequest(Box<SetPublishingModeRequest>),
+    SetPublishingModeResponse(Box<SetPublishingModeResponse>),
+    BrowseRequest(Box<BrowseRequest>),
+    BrowseResponse(Box<BrowseResponse>),
+    BrowseNextRequest(Box<BrowseNextRequest>),
+    BrowseNextResponse(Box<BrowseNextResponse>),
+    PublishRequest(Box<PublishRequest>),
+    PublishResponse(Box<PublishResponse>),
+    RepublishRequest(Box<RepublishRequest>),
+    RepublishResponse(Box<RepublishResponse>),
+    TranslateBrowsePathsToNodeIdsRequest(Box<TranslateBrowsePathsToNodeIdsRequest>),
+    TranslateBrowsePathsToNodeIdsResponse(Box<TranslateBrowsePathsToNodeIdsResponse>),
+    RegisterNodesRequest(Box<RegisterNodesRequest>),
+    RegisterNodesResponse(Box<RegisterNodesResponse>),
+    UnregisterNodesRequest(Box<UnregisterNodesRequest>),
+    UnregisterNodesResponse(Box<UnregisterNodesResponse>),
+    ReadRequest(Box<ReadRequest>),
+    ReadResponse(Box<ReadResponse>),
+    WriteRequest(Box<WriteRequest>),
+    WriteResponse(Box<WriteResponse>),
+    CallRequest(Box<CallRequest>),
+    CallResponse(Box<CallResponse>),
+}
+impl BinaryEncoder<SupportedMessage> for SupportedMessage {
+    fn byte_len(&self) -> usize {
+        match *self {
+            SupportedMessage::Invalid(object_id) => {
+                panic!("Unsupported message byte_len {:?}", object_id);
+            }
+            SupportedMessage::AcknowledgeMessage(ref value) => value.byte_len(),
+            SupportedMessage::ServiceFault(ref value) => value.byte_len(),
+            SupportedMessage::OpenSecureChannelRequest(ref value) => value.byte_len(),
+            SupportedMessage::OpenSecureChannelResponse(ref value) => value.byte_len(),
+            SupportedMessage::CloseSecureChannelRequest(ref value) => value.byte_len(),
+            SupportedMessage::CloseSecureChannelResponse(ref value) => value.byte_len(),
+            SupportedMessage::GetEndpointsRequest(ref value) => value.byte_len(),
+            SupportedMessage::GetEndpointsResponse(ref value) => value.byte_len(),
+            SupportedMessage::FindServersRequest(ref value) => value.byte_len(),
+            SupportedMessage::FindServersResponse(ref value) => value.byte_len(),
+            SupportedMessage::RegisterServerRequest(ref value) => value.byte_len(),
+            SupportedMessage::RegisterServerResponse(ref value) => value.byte_len(),
+            SupportedMessage::CreateSessionRequest(ref value) => value.byte_len(),
+            SupportedMessage::CreateSessionResponse(ref value) => value.byte_len(),
+            SupportedMessage::CloseSessionRequest(ref value) => value.byte_len(),
+            SupportedMessage::CloseSessionResponse(ref value) => value.byte_len(),
+            SupportedMessage::CancelRequest(ref value) => value.byte_len(),
+            SupportedMessage::CancelResponse(ref value) => value.byte_len(),
+            SupportedMessage::ActivateSessionRequest(ref value) => value.byte_len(),
+            SupportedMessage::ActivateSessionResponse(ref value) => value.byte_len(),
+            SupportedMessage::AddNodesRequest(ref value) => value.byte_len(),
+            SupportedMessage::AddNodesResponse(ref value) => value.byte_len(),
+            SupportedMessage::AddReferencesRequest(ref value) => value.byte_len(),
+            SupportedMessage::AddReferencesResponse(ref value) => value.byte_len(),
+            SupportedMessage::DeleteNodesRequest(ref value) => value.byte_len(),
+            SupportedMessage::DeleteNodesResponse(ref value) => value.byte_len(),
+            SupportedMessage::DeleteReferencesRequest(ref value) => value.byte_len(),
+            SupportedMessage::DeleteReferencesResponse(ref value) => value.byte_len(),
+            SupportedMessage::CreateMonitoredItemsRequest(ref value) => value.byte_len(),
+            SupportedMessage::CreateMonitoredItemsResponse(ref value) => value.byte_len(),
+            SupportedMessage::ModifyMonitoredItemsRequest(ref value) => value.byte_len(),
+            SupportedMessage::ModifyMonitoredItemsResponse(ref value) => value.byte_len(),
+            SupportedMessage::DeleteMonitoredItemsRequest(ref value) => value.byte_len(),
+            SupportedMessage::DeleteMonitoredItemsResponse(ref value) => value.byte_len(),
+            SupportedMessage::SetMonitoringModeRequest(ref value) => value.byte_len(),
+            SupportedMessage::SetMonitoringModeResponse(ref value) => value.byte_len(),
+            SupportedMessage::SetTriggeringRequest(ref value) => value.byte_len(),
+            SupportedMessage::SetTriggeringResponse(ref value) => value.byte_len(),
+            SupportedMessage::CreateSubscriptionRequest(ref value) => value.byte_len(),
+            SupportedMessage::CreateSubscriptionResponse(ref value) => value.byte_len(),
+            SupportedMessage::ModifySubscriptionRequest(ref value) => value.byte_len(),
+            SupportedMessage::ModifySubscriptionResponse(ref value) => value.byte_len(),
+            SupportedMessage::DeleteSubscriptionsRequest(ref value) => value.byte_len(),
+            SupportedMessage::DeleteSubscriptionsResponse(ref value) => value.byte_len(),
+            SupportedMessage::TransferSubscriptionsRequest(ref value) => value.byte_len(),
+            SupportedMessage::TransferSubscriptionsResponse(ref value) => value.byte_len(),
+            SupportedMessage::SetPublishingModeRequest(ref value) => value.byte_len(),
+            SupportedMessage::SetPublishingModeResponse(ref value) => value.byte_len(),
+            SupportedMessage::BrowseRequest(ref value) => value.byte_len(),
+            SupportedMessage::BrowseResponse(ref value) => value.byte_len(),
+            SupportedMessage::BrowseNextRequest(ref value) => value.byte_len(),
+            SupportedMessage::BrowseNextResponse(ref value) => value.byte_len(),
+            SupportedMessage::PublishRequest(ref value) => value.byte_len(),
+            SupportedMessage::PublishResponse(ref value) => value.byte_len(),
+            SupportedMessage::RepublishRequest(ref value) => value.byte_len(),
+            SupportedMessage::RepublishResponse(ref value) => value.byte_len(),
+            SupportedMessage::TranslateBrowsePathsToNodeIdsRequest(ref value) => {
+                value.byte_len()
+            }
+            SupportedMessage::TranslateBrowsePathsToNodeIdsResponse(ref value) => {
+                value.byte_len()
+            }
+            SupportedMessage::RegisterNodesRequest(ref value) => value.byte_len(),
+            SupportedMessage::RegisterNodesResponse(ref value) => value.byte_len(),
+            SupportedMessage::UnregisterNodesRequest(ref value) => value.byte_len(),
+            SupportedMessage::UnregisterNodesResponse(ref value) => value.byte_len(),
+            SupportedMessage::ReadRequest(ref value) => value.byte_len(),
+            SupportedMessage::ReadResponse(ref value) => value.byte_len(),
+            SupportedMessage::WriteRequest(ref value) => value.byte_len(),
+            SupportedMessage::WriteResponse(ref value) => value.byte_len(),
+            SupportedMessage::CallRequest(ref value) => value.byte_len(),
+            SupportedMessage::CallResponse(ref value) => value.byte_len(),
+        }
+    }
+    fn encode<S: Write>(&self, stream: &mut S) -> EncodingResult<usize> {
+        match *self {
+            SupportedMessage::Invalid(object_id) => {
+                panic!("Unsupported message encode {:?}", object_id);
+            }
+            SupportedMessage::AcknowledgeMessage(ref value) => value.encode(stream),
+            SupportedMessage::ServiceFault(ref value) => value.encode(stream),
+            SupportedMessage::OpenSecureChannelRequest(ref value) => value.encode(stream),
+            SupportedMessage::OpenSecureChannelResponse(ref value) => value.encode(stream),
+            SupportedMessage::CloseSecureChannelRequest(ref value) => value.encode(stream),
+            SupportedMessage::CloseSecureChannelResponse(ref value) => value.encode(stream),
+            SupportedMessage::GetEndpointsRequest(ref value) => value.encode(stream),
+            SupportedMessage::GetEndpointsResponse(ref value) => value.encode(stream),
+            SupportedMessage::FindServersRequest(ref value) => value.encode(stream),
+            SupportedMessage::FindServersResponse(ref value) => value.encode(stream),
+            SupportedMessage::RegisterServerRequest(ref value) => value.encode(stream),
+            SupportedMessage::RegisterServerResponse(ref value) => value.encode(stream),
+            SupportedMessage::CreateSessionRequest(ref value) => value.encode(stream),
+            SupportedMessage::CreateSessionResponse(ref value) => value.encode(stream),
+            SupportedMessage::CloseSessionRequest(ref value) => value.encode(stream),
+            SupportedMessage::CloseSessionResponse(ref value) => value.encode(stream),
+            SupportedMessage::CancelRequest(ref value) => value.encode(stream),
+            SupportedMessage::CancelResponse(ref value) => value.encode(stream),
+            SupportedMessage::ActivateSessionRequest(ref value) => value.encode(stream),
+            SupportedMessage::ActivateSessionResponse(ref value) => value.encode(stream),
+            SupportedMessage::AddNodesRequest(ref value) => value.encode(stream),
+            SupportedMessage::AddNodesResponse(ref value) => value.encode(stream),
+            SupportedMessage::AddReferencesRequest(ref value) => value.encode(stream),
+            SupportedMessage::AddReferencesResponse(ref value) => value.encode(stream),
+            SupportedMessage::DeleteNodesRequest(ref value) => value.encode(stream),
+            SupportedMessage::DeleteNodesResponse(ref value) => value.encode(stream),
+            SupportedMessage::DeleteReferencesRequest(ref value) => value.encode(stream),
+            SupportedMessage::DeleteReferencesResponse(ref value) => value.encode(stream),
+            SupportedMessage::CreateMonitoredItemsRequest(ref value) => value.encode(stream),
+            SupportedMessage::CreateMonitoredItemsResponse(ref value) => value.encode(stream),
+            SupportedMessage::ModifyMonitoredItemsRequest(ref value) => value.encode(stream),
+            SupportedMessage::ModifyMonitoredItemsResponse(ref value) => value.encode(stream),
+            SupportedMessage::DeleteMonitoredItemsRequest(ref value) => value.encode(stream),
+            SupportedMessage::DeleteMonitoredItemsResponse(ref value) => value.encode(stream),
+            SupportedMessage::SetMonitoringModeRequest(ref value) => value.encode(stream),
+            SupportedMessage::SetMonitoringModeResponse(ref value) => value.encode(stream),
+            SupportedMessage::SetTriggeringRequest(ref value) => value.encode(stream),
+            SupportedMessage::SetTriggeringResponse(ref value) => value.encode(stream),
+            SupportedMessage::CreateSubscriptionRequest(ref value) => value.encode(stream),
+            SupportedMessage::CreateSubscriptionResponse(ref value) => value.encode(stream),
+            SupportedMessage::ModifySubscriptionRequest(ref value) => value.encode(stream),
+            SupportedMessage::ModifySubscriptionResponse(ref value) => value.encode(stream),
+            SupportedMessage::DeleteSubscriptionsRequest(ref value) => value.encode(stream),
+            SupportedMessage::DeleteSubscriptionsResponse(ref value) => value.encode(stream),
+            SupportedMessage::TransferSubscriptionsRequest(ref value) => value.encode(stream),
+            SupportedMessage::TransferSubscriptionsResponse(ref value) => value.encode(stream),
+            SupportedMessage::SetPublishingModeRequest(ref value) => value.encode(stream),
+            SupportedMessage::SetPublishingModeResponse(ref value) => value.encode(stream),
+            SupportedMessage::BrowseRequest(ref value) => value.encode(stream),
+            SupportedMessage::BrowseResponse(ref value) => value.encode(stream),
+            SupportedMessage::BrowseNextRequest(ref value) => value.encode(stream),
+            SupportedMessage::BrowseNextResponse(ref value) => value.encode(stream),
+            SupportedMessage::PublishRequest(ref value) => value.encode(stream),
+            SupportedMessage::PublishResponse(ref value) => value.encode(stream),
+            SupportedMessage::RepublishRequest(ref value) => value.encode(stream),
+            SupportedMessage::RepublishResponse(ref value) => value.encode(stream),
+            SupportedMessage::TranslateBrowsePathsToNodeIdsRequest(ref value) => {
+                value.encode(stream)
+            }
+            SupportedMessage::TranslateBrowsePathsToNodeIdsResponse(ref value) => {
+                value.encode(stream)
+            }
+            SupportedMessage::RegisterNodesRequest(ref value) => value.encode(stream),
+            SupportedMessage::RegisterNodesResponse(ref value) => value.encode(stream),
+            SupportedMessage::UnregisterNodesRequest(ref value) => value.encode(stream),
+            SupportedMessage::UnregisterNodesResponse(ref value) => value.encode(stream),
+            SupportedMessage::ReadRequest(ref value) => value.encode(stream),
+            SupportedMessage::ReadResponse(ref value) => value.encode(stream),
+            SupportedMessage::WriteRequest(ref value) => value.encode(stream),
+            SupportedMessage::WriteResponse(ref value) => value.encode(stream),
+            SupportedMessage::CallRequest(ref value) => value.encode(stream),
+            SupportedMessage::CallResponse(ref value) => value.encode(stream),
+        }
+    }
+    fn decode<S: Read>(_: &mut S, _: &DecodingLimits) -> EncodingResult<Self> {
+        panic!("Cannot decode a stream to a supported message type");
+    }
+}
+impl Into<SupportedMessage> for AcknowledgeMessage {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::AcknowledgeMessage(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ServiceFault {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ServiceFault(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for OpenSecureChannelRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::OpenSecureChannelRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for OpenSecureChannelResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::OpenSecureChannelResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CloseSecureChannelRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CloseSecureChannelRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CloseSecureChannelResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CloseSecureChannelResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for GetEndpointsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::GetEndpointsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for GetEndpointsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::GetEndpointsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for FindServersRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::FindServersRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for FindServersResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::FindServersResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RegisterServerRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RegisterServerRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RegisterServerResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RegisterServerResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateSessionRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateSessionRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateSessionResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateSessionResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CloseSessionRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CloseSessionRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CloseSessionResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CloseSessionResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CancelRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CancelRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CancelResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CancelResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ActivateSessionRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ActivateSessionRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ActivateSessionResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ActivateSessionResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for AddNodesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::AddNodesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for AddNodesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::AddNodesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for AddReferencesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::AddReferencesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for AddReferencesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::AddReferencesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteNodesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteNodesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteNodesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteNodesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteReferencesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteReferencesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteReferencesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteReferencesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateMonitoredItemsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateMonitoredItemsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateMonitoredItemsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateMonitoredItemsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ModifyMonitoredItemsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ModifyMonitoredItemsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ModifyMonitoredItemsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ModifyMonitoredItemsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteMonitoredItemsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteMonitoredItemsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteMonitoredItemsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteMonitoredItemsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetMonitoringModeRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetMonitoringModeRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetMonitoringModeResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetMonitoringModeResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetTriggeringRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetTriggeringRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetTriggeringResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetTriggeringResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateSubscriptionRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateSubscriptionRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CreateSubscriptionResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CreateSubscriptionResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ModifySubscriptionRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ModifySubscriptionRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ModifySubscriptionResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ModifySubscriptionResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteSubscriptionsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteSubscriptionsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for DeleteSubscriptionsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::DeleteSubscriptionsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for TransferSubscriptionsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::TransferSubscriptionsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for TransferSubscriptionsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::TransferSubscriptionsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetPublishingModeRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetPublishingModeRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for SetPublishingModeResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::SetPublishingModeResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for BrowseRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::BrowseRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for BrowseResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::BrowseResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for BrowseNextRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::BrowseNextRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for BrowseNextResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::BrowseNextResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for PublishRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::PublishRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for PublishResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::PublishResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RepublishRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RepublishRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RepublishResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RepublishResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for TranslateBrowsePathsToNodeIdsRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::TranslateBrowsePathsToNodeIdsRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for TranslateBrowsePathsToNodeIdsResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::TranslateBrowsePathsToNodeIdsResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RegisterNodesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RegisterNodesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for RegisterNodesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::RegisterNodesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for UnregisterNodesRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::UnregisterNodesRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for UnregisterNodesResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::UnregisterNodesResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ReadRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ReadRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for ReadResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::ReadResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for WriteRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::WriteRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for WriteResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::WriteResponse(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CallRequest {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CallRequest(Box::new(self))
+    }
+}
+impl Into<SupportedMessage> for CallResponse {
+    fn into(self) -> SupportedMessage {
+        SupportedMessage::CallResponse(Box::new(self))
+    }
+}
+impl SupportedMessage {
+    pub fn node_id(&self) -> NodeId {
+        match *self {
+            SupportedMessage::Invalid(object_id) => {
+                panic!("Unsupported message invalid, node_id {:?}", object_id);
+            }
+            SupportedMessage::AcknowledgeMessage(ref value) => {
+                panic!("Unsupported message node_id {:?}", value);
+            }
+            SupportedMessage::ServiceFault(ref value) => value.object_id().into(),
+            SupportedMessage::OpenSecureChannelRequest(ref value) => value.object_id().into(),
+            SupportedMessage::OpenSecureChannelResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CloseSecureChannelRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CloseSecureChannelResponse(ref value) => value.object_id().into(),
+            SupportedMessage::GetEndpointsRequest(ref value) => value.object_id().into(),
+            SupportedMessage::GetEndpointsResponse(ref value) => value.object_id().into(),
+            SupportedMessage::FindServersRequest(ref value) => value.object_id().into(),
+            SupportedMessage::FindServersResponse(ref value) => value.object_id().into(),
+            SupportedMessage::RegisterServerRequest(ref value) => value.object_id().into(),
+            SupportedMessage::RegisterServerResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CreateSessionRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CreateSessionResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CloseSessionRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CloseSessionResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CancelRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CancelResponse(ref value) => value.object_id().into(),
+            SupportedMessage::ActivateSessionRequest(ref value) => value.object_id().into(),
+            SupportedMessage::ActivateSessionResponse(ref value) => value.object_id().into(),
+            SupportedMessage::AddNodesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::AddNodesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::AddReferencesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::AddReferencesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteNodesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteNodesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteReferencesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteReferencesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CreateMonitoredItemsRequest(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::CreateMonitoredItemsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::ModifyMonitoredItemsRequest(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::ModifyMonitoredItemsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::DeleteMonitoredItemsRequest(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::DeleteMonitoredItemsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::SetMonitoringModeRequest(ref value) => value.object_id().into(),
+            SupportedMessage::SetMonitoringModeResponse(ref value) => value.object_id().into(),
+            SupportedMessage::SetTriggeringRequest(ref value) => value.object_id().into(),
+            SupportedMessage::SetTriggeringResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CreateSubscriptionRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CreateSubscriptionResponse(ref value) => value.object_id().into(),
+            SupportedMessage::ModifySubscriptionRequest(ref value) => value.object_id().into(),
+            SupportedMessage::ModifySubscriptionResponse(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteSubscriptionsRequest(ref value) => value.object_id().into(),
+            SupportedMessage::DeleteSubscriptionsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::TransferSubscriptionsRequest(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::TransferSubscriptionsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::SetPublishingModeRequest(ref value) => value.object_id().into(),
+            SupportedMessage::SetPublishingModeResponse(ref value) => value.object_id().into(),
+            SupportedMessage::BrowseRequest(ref value) => value.object_id().into(),
+            SupportedMessage::BrowseResponse(ref value) => value.object_id().into(),
+            SupportedMessage::BrowseNextRequest(ref value) => value.object_id().into(),
+            SupportedMessage::BrowseNextResponse(ref value) => value.object_id().into(),
+            SupportedMessage::PublishRequest(ref value) => value.object_id().into(),
+            SupportedMessage::PublishResponse(ref value) => value.object_id().into(),
+            SupportedMessage::RepublishRequest(ref value) => value.object_id().into(),
+            SupportedMessage::RepublishResponse(ref value) => value.object_id().into(),
+            SupportedMessage::TranslateBrowsePathsToNodeIdsRequest(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::TranslateBrowsePathsToNodeIdsResponse(ref value) => {
+                value.object_id().into()
+            }
+            SupportedMessage::RegisterNodesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::RegisterNodesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::UnregisterNodesRequest(ref value) => value.object_id().into(),
+            SupportedMessage::UnregisterNodesResponse(ref value) => value.object_id().into(),
+            SupportedMessage::ReadRequest(ref value) => value.object_id().into(),
+            SupportedMessage::ReadResponse(ref value) => value.object_id().into(),
+            SupportedMessage::WriteRequest(ref value) => value.object_id().into(),
+            SupportedMessage::WriteResponse(ref value) => value.object_id().into(),
+            SupportedMessage::CallRequest(ref value) => value.object_id().into(),
+            SupportedMessage::CallResponse(ref value) => value.object_id().into(),
+        }
+    }
+}

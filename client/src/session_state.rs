@@ -72,7 +72,7 @@ pub(crate) struct SessionState {
     /// A flag which tells client to wait for a publish response before sending any new publish
     /// requests
     wait_for_publish_response: bool,
-    /// The message queue
+    /// The message queue,和session共用的同一个
     message_queue: Arc<RwLock<MessageQueue>>,
     /// Connection closed callback
     session_closed_callback: Option<Box<dyn OnSessionClosed + Send + Sync + 'static>>,
@@ -278,6 +278,7 @@ impl SessionState {
         // silently.
         let start = chrono::Utc::now();
         loop {
+            //反复检查message_queue中是否有想要的结果,如果没有继续等待
             if let Some(response) = self.take_response(request_handle) {
                 // Got the response
                 return Ok(response);
@@ -296,7 +297,7 @@ impl SessionState {
     }
 
     fn take_response(&self, request_handle: u32) -> Option<SupportedMessage> {
-        let mut message_queue = trace_write_lock_unwrap!(self.message_queue);
+        let mut message_queue = self.message_queue.write().unwrap();
         message_queue.take_response(request_handle)
     }
 

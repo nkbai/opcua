@@ -38,7 +38,10 @@ pub struct TcpCodec {
 impl Decoder for TcpCodec {
     type Item = Message;
     type Error = io::Error;
-
+    /*
+    从缓冲区中凑出来一个Message后返回,
+    也就是一个Frame
+    */
     fn decode(&mut self, buf: &mut BytesMut) -> Result<Option<Self::Item>, Self::Error> {
         if self.is_abort() {
             // Abort immediately

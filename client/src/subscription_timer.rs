@@ -75,11 +75,11 @@ impl SubscriptionTimer {
     fn make_subscription_timer(timer: Arc<RwLock<SubscriptionTimer>>) -> Box<dyn Future<Item=(), Error=()> + Send> {
         let publishing_interval = {
             let (subscription_id, subscription_state) = {
-                let timer = trace_read_lock_unwrap!(timer);
+                let timer =timer.read().unwrap();
                 (timer.subscription_id, timer.subscription_state.clone())
             };
 
-            let ss = trace_read_lock_unwrap!(subscription_state);
+            let ss =subscription_state.read().unwrap(); //  trace_read_lock_unwrap!(subscription_state);
             if let Some(subscription) = ss.get(subscription_id) {
                 subscription.publishing_interval()
             } else {
@@ -95,7 +95,7 @@ impl SubscriptionTimer {
             .take_while(move |_| {
                 trace!("publishing_interval.take_while");
                 let (cancel, subscription_id, subscription_state) = {
-                    let timer = trace_read_lock_unwrap!(timer_for_take);
+                    let timer = timer_for_take.read().unwrap(); // trace_read_lock_unwrap!(timer_for_take);
                     (timer.cancel, timer.subscription_id, timer.subscription_state.clone())
                 };
                 let (take, respawn) = {
@@ -103,7 +103,7 @@ impl SubscriptionTimer {
                         debug!("Subscription timer for subscription id {} is being dropped because it was cancelled", subscription_id);
                         (false, false)
                     } else {
-                        let subscription_state = trace_read_lock_unwrap!(subscription_state);
+                        let subscription_state =subscription_state.read().unwrap(); //  trace_read_lock_unwrap!(subscription_state);
                         if let Some(ref subscription) = subscription_state.get(subscription_id) {
                             if publishing_interval != subscription.publishing_interval() {
                                 // Interval has changed, so don't take the timer, and instead
@@ -122,6 +122,7 @@ impl SubscriptionTimer {
                     }
                 };
                 if respawn {
+                    //如果respawn
                     tokio::spawn(Self::make_subscription_timer(timer_for_take.clone()));
                 }
                 future::ok(take)
@@ -129,12 +130,12 @@ impl SubscriptionTimer {
             .for_each(move |_| {
                 // Server may have throttled publish requests
                 let (subscription_id, session_state) = {
-                    let timer = trace_read_lock_unwrap!(timer);
+                    let timer = timer.read().unwrap(); //  trace_read_lock_unwrap!(timer);
                     (timer.subscription_id, timer.session_state.clone())
                 };
 
                 let wait_for_publish_response = {
-                    let session_state = trace_read_lock_unwrap!(session_state);
+                    let session_state = session_state.read().unwrap(); // trace_read_lock_unwrap!(session_state);
                     session_state.wait_for_publish_response()
                 };
                 if !wait_for_publish_response {

@@ -84,7 +84,8 @@ extern crate serde_derive;
 extern crate lazy_static;
 #[macro_use]
 extern crate opcua_core;
-
+#[macro_use]
+extern crate opcua_types;
 mod comms;
 mod subscription;
 mod subscription_state;
