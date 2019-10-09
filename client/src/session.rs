@@ -38,6 +38,7 @@ use crate::{
     subscription_state::SubscriptionState,
     subscription_timer::{SubscriptionTimer, SubscriptionTimerCommand},
 };
+use std::sync::RwLockReadGuard;
 
 /// Information about the server endpoint, security policy, security mode and user identity that the session will
 /// will use to establish a connection.
@@ -856,6 +857,7 @@ impl Session {
     /// connected to a server, negotiate a timeout period and then for whatever reason need to
     /// reconnect to that same server, you will receive the same timeout. If you get a different
     /// timeout then this code will not care and will continue to ping at the original rate.
+    /// 这个task非常简单,就是不停的发送ping消息,这段代码看起来rust写起来真是啰嗦啊, 为什么要写这么啰嗦呢
     fn spawn_session_activity_task(&mut self, session_timeout: f64) {
         debug!("spawn_session_activity_task({})", session_timeout);
 
@@ -881,7 +883,7 @@ impl Session {
         let session_activity_interval = Duration::from_millis(session_activity);
         let task = Interval::new(Instant::now(), Duration::from_millis(MIN_SESSION_ACTIVITY_MS))
             .take_while(move |_| {
-                let connection_state = trace_read_lock_unwrap!(connection_state_take_while);
+                let connection_state =connection_state_take_while.read().unwrap(); //  trace_read_lock_unwrap!(connection_state_take_while);
                 let terminated = match *connection_state {
                     ConnectionState::Finished(_) => true,
                     _ => false
@@ -897,7 +899,7 @@ impl Session {
                 let interval = now - *last_timeout;
                 if interval > session_activity_interval {
                     let connection_state = {
-                        let connection_state = trace_read_lock_unwrap!(connection_state_for_each);
+                        let connection_state :RwLockReadGuard<ConnectionState>= connection_state_for_each.read().unwrap(); // trace_read_lock_unwrap!(connection_state_for_each);
                         *connection_state
                     };
                     match connection_state {
