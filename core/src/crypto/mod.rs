@@ -2,9 +2,22 @@
 //! trust between a client and server via certificate exchange and validation. It also used for
 //! encrypting / decrypting messages and signing messages.
 
-use opcua_types::{UAString, ByteString};
-use opcua_types::service_types::SignatureData;
-use opcua_types::status_code::StatusCode;
+use opcua_types::{
+    ByteString, service_types::SignatureData,
+    status_code::StatusCode,
+    UAString,
+};
+
+pub use self::{
+    aeskey::*,
+    certificate_store::*,
+    hash::*,
+    pkey::*,
+    security_policy::*,
+    thumbprint::*,
+    user_identity::*,
+    x509::*,
+};
 
 pub mod x509;
 pub mod aeskey;
@@ -15,15 +28,6 @@ pub mod hash;
 pub mod security_policy;
 pub mod user_identity;
 pub mod random;
-
-pub use self::x509::*;
-pub use self::aeskey::*;
-pub use self::pkey::*;
-pub use self::thumbprint::*;
-pub use self::certificate_store::*;
-pub use self::hash::*;
-pub use self::security_policy::*;
-pub use self::user_identity::*;
 
 // Size of a SHA1 hash value in bytes
 pub const SHA1_SIZE: usize = 20;
@@ -79,7 +83,7 @@ pub fn create_signature_data(signing_key: &PrivateKey, security_policy: Security
     // TODO this function should be refactored to return an error if the contained cert or nonce is incorrect, not a blank signature. That
     //  very much depends on reading the spec to see what should happen if its not possible to create a signature, e.g. because
     //  policy is None.
-
+  //真不觉得这种写法看起来优雅
     let (algorithm, signature) = if contained_cert.is_null() || nonce.is_null() {
         (UAString::null(), ByteString::null())
     } else {

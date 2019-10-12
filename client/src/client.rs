@@ -383,28 +383,31 @@ impl Client {
         debug!("find_servers, {}", discovery_endpoint_url);
         let endpoint = EndpointDescription::from(discovery_endpoint_url.as_ref());
         let session = self.new_session_from_info(endpoint);
-        if let Ok(session) = session {
-            let mut session = trace_write_lock_unwrap!(session);
-            // Connect & activate the session.
-            let connected = session.connect();
-            if connected.is_ok() {
-                // Find me some some servers
-                let result = session.find_servers(discovery_endpoint_url.clone())
-                    .map_err(|err| {
-                        error!("Cannot find servers on discovery server {} - check this error - {:?}", discovery_endpoint_url, err);
-                        err
-                    });
-                session.disconnect();
-                result
-            } else {
-                let result = connected.unwrap_err();
-                error!("Cannot connect to {} - check this error - {}", discovery_endpoint_url, result);
+        match session {
+            Ok(session) => {
+                let mut session =  session.write().unwrap(); //  trace_write_lock_unwrap!(session);
+                // Connect & activate the session.
+                let connected = session.connect();
+                if connected.is_ok() {
+                    // Find me some some servers
+                    let result = session.find_servers(discovery_endpoint_url.clone())
+                        .map_err(|err| {
+                            error!("Cannot find servers on discovery server {} - check this error - {:?}", discovery_endpoint_url, err);
+                            err
+                        });
+                    session.disconnect();
+                    result
+                } else {
+                    let result = connected.unwrap_err();
+                    error!("Cannot connect to {} - check this error - {}", discovery_endpoint_url, result);
+                    Err(result)
+                }
+            }
+            Err(..) => {
+                let result = StatusCode::BadUnexpectedError;
+                error!("Cannot create a sesion to {} - check if url is malformed", discovery_endpoint_url);
                 Err(result)
             }
-        } else {
-            let result = StatusCode::BadUnexpectedError;
-            error!("Cannot create a sesion to {} - check if url is malformed", discovery_endpoint_url);
-            Err(result)
         }
     }
 

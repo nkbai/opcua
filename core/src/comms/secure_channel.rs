@@ -22,7 +22,7 @@ use crate::{
         random,
     },
 };
-
+/// 这个文件非常重要,是消息通道加密解密用
 #[derive(Debug, PartialEq)]
 pub enum Role {
     Unknown,
@@ -568,7 +568,7 @@ impl SecureChannel {
         // S - Sequence Header - E
         // S - Body            - E
         // S - Padding         - E
-        //     Signature       - E
+        //     Signature       - E //todo 这种if 写法真的清晰么?
         let data = if message_header.message_type.is_open_secure_channel() {
             // The OpenSecureChannel is the first thing we receive so we must examine
             // the security policy and use it to determine if the packet must be decrypted.
@@ -578,7 +578,7 @@ impl SecureChannel {
 
             let security_header = match security_header {
                 SecurityHeader::Asymmetric(security_header) => security_header,
-                _ => {
+                _ => { //不支持对称加密?
                     panic!();
                 }
             };

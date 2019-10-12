@@ -1,10 +1,6 @@
 use std::result::Result;
 
-use opcua_types::{
-    *,
-    status_code::StatusCode,
-    service_types::{ServiceFault, SecurityTokenRequestType, OpenSecureChannelResponse, ResponseHeader, ChannelSecurityToken},
-};
+use opcua_types::{*, status_code::StatusCode};
 
 use opcua_core::comms::prelude::*;
 use opcua_core::crypto::SecurityPolicy;
@@ -82,13 +78,14 @@ impl SecureChannelService {
         }
 
         // Test the request type
-        match request.request_type {
+        let secure_channel_id = match request.request_type {
             SecurityTokenRequestType::Issue => {
                 trace!("Request type == Issue");
                 // check to see if renew has been called before or not
                 if self.secure_channel_state.renew_count > 0 {
                     error!("Asked to issue token on session that has called renew before");
                 }
+                self.secure_channel_state.create_secure_channel_id()
             }
             SecurityTokenRequestType::Renew => {
                 trace!("Request type == Renew");
@@ -107,8 +104,9 @@ impl SecureChannelService {
                     return Err(StatusCode::BadUnexpectedError);
                 }
                 self.secure_channel_state.renew_count += 1;
+                secure_channel.secure_channel_id()
             }
-        }
+        };
 
         // Check the requested security mode
         debug!("Message security mode == {:?}", request.security_mode);
@@ -129,7 +127,7 @@ impl SecureChannelService {
         let security_mode = request.security_mode;
         secure_channel.set_security_mode(security_mode);
         secure_channel.set_token_id(self.secure_channel_state.create_token_id());
-        secure_channel.set_secure_channel_id(self.secure_channel_state.create_secure_channel_id());
+        secure_channel.set_secure_channel_id(secure_channel_id);
         secure_channel.set_remote_cert_from_byte_string(&security_header.sender_certificate)?;
 
         let nonce_result = secure_channel.set_remote_nonce_from_byte_string(&request.client_nonce);
