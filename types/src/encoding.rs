@@ -99,7 +99,8 @@ pub fn write_array<S: Write, T: BinaryEncoder<T>>(stream: &mut S, values: &Optio
             size += value.encode(stream)?;
         }
     } else {
-        size += write_i32(stream, -1)?;
+        //todo 如果没有,长度应该写0?
+        size += write_i32(stream, 0)?;
     }
     Ok(size)
 }

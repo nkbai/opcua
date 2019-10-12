@@ -7,6 +7,7 @@ use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 
 use env_logger::{Builder, Color};
+use log::{Level, LevelFilter};
 
 pub fn init() {
     lazy_static! {
@@ -19,6 +20,7 @@ pub fn init() {
         // env_logger/RUST_LOG is used by cargo and other rust tools so console fills with garbage from
         // other processes  when we're only interested in our own garbage!
         let mut builder = Builder::from_env("RUST_OPCUA_LOG");
+        builder.filter_level(LevelFilter::Debug);
         builder.format(|buf, record| {
             let now = chrono::Utc::now();
             let time_fmt = now.format("%Y-%m-%d %H:%M:%S%.3f");
@@ -42,7 +44,7 @@ pub fn init() {
                 _ => {}
             }
 
-            writeln!(buf, "{} - {} - {} - {}", time_fmt, style.value(record.level()), record.target(), record.args())
+            writeln!(buf, "{} - {} - {} - {}-{} - {}", time_fmt, style.value(record.level()), record.target(),record.file().unwrap() ,record.line().unwrap(), record.args())
         });
         builder.init();
         info!("Logging is enabled, use RUST_OPCUA_LOG environment variable to control filtering, logging level");
