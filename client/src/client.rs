@@ -217,6 +217,7 @@ impl Client {
             let mut session = session.write().unwrap();
             if let Err(result) = session.connect_and_activate() {
                 error!("Got an error while creating the default session - {}", result.description());
+                return Err(result);
             }
         }
 

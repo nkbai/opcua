@@ -171,8 +171,11 @@ impl Session {
     ///
     pub fn connect_and_activate(&mut self) -> Result<(), StatusCode> {
         // Connect now using the session state
+        info!("connect start.");
         self.connect()?;
+        info!("create session.");
         self.create_session()?;
+        info!("activate_session.");
         self.activate_session()?;
         Ok(())
     }
@@ -807,7 +810,7 @@ impl Session {
                 session_state.session_id()
             };
 
-            // debug!("Server nonce is {:?}", response.server_nonce);
+             debug!("Server nonce is {:?}", response.server_nonce);
 
             // The server certificate is validated if the policy requires it
             let security_policy = self.security_policy();
