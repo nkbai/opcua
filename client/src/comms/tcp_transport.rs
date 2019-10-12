@@ -227,7 +227,7 @@ impl TcpTransport {
 
                 let thread_id = format!("client-connection-thread-{:?}", thread::current().id());
 //                register_runtime_component!(thread_id.clone());
-                RUNTIME.register_component((thread_id.clone()));
+                RUNTIME.register_component(thread_id.clone());
                 //connection_task不结束是不会返回的
                 tokio::run(connection_task);
                 debug!("Client tokio tasks have stopped for connection");
@@ -645,7 +645,7 @@ impl TcpTransport {
 
         // Create the message receiver that will drive writes
         let (sender, receiver) = {
-            let mut message_queue:MessageQueue  = trace_write_lock_unwrap!(message_queue);
+            let mut message_queue  = trace_write_lock_unwrap!(message_queue);
             message_queue.make_request_channel() //一个session会有多个tcp链接么?
         };
 
