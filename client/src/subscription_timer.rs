@@ -15,6 +15,7 @@ use tokio_timer::Interval;
 use crate::{
     session_state::SessionState, subscription_state::SubscriptionState,
 };
+use std::sync::RwLockWriteGuard;
 
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum SubscriptionTimerCommand {
@@ -142,7 +143,7 @@ impl SubscriptionTimer {
                     // We could not send the publish request if subscription is not reporting, or
                     // contains no monitored items but it probably makes no odds.
                     debug!("Subscription timer for {} is sending a publish", subscription_id);
-                    let mut session_state = trace_write_lock_unwrap!(session_state);
+                    let mut session_state:RwLockWriteGuard<SessionState> =  trace_write_lock_unwrap!(session_state);
                     // Send a publish request with any acknowledgements
                     let subscription_acknowledgements = session_state.subscription_acknowledgements();
                     let _ = session_state.async_publish(&subscription_acknowledgements);
