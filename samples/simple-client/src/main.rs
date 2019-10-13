@@ -4,7 +4,9 @@
 //! 2. Connect & create a session on one of those endpoints that match with its config (you can override which using --endpoint-id arg)
 //! 3. Subscribe to values and loop forever printing out their values
 use std::sync::{Arc, RwLock};
-
+#[macro_use]
+extern crate log;
+use crate::log::*;
 use clap::{App, Arg};
 
 use opcua_client::prelude::*;
@@ -16,7 +18,8 @@ fn main() {
             .long("url")
             .help("Specify the OPC UA endpoint to connect to")
             .takes_value(true)
-            .default_value("opc.tcp://localhost:4855")
+            .default_value("opc.tcp://188.0.0.101:4840")
+//            .default_value("opc.tcp://127.0.0.1:4855")
             .required(false))
         .get_matches();
     let url = m.value_of("url").unwrap().to_string();
@@ -33,12 +36,20 @@ fn main() {
         .session_retry_limit(3)
         .client().unwrap();
 
-    if let Ok(session) = client.connect_to_endpoint((url.as_ref(), SecurityPolicy::None.to_str(), MessageSecurityMode::None, UserTokenPolicy::anonymous()), IdentityToken::Anonymous) {
-        if let Err(result) = subscribe_to_variables(session.clone()) {
-            println!("ERROR: Got an error while subscribing to variables - {}", result);
-        } else { //这种写法清晰么? err return 不更好么
-            // Loops forever. The publish thread will call the callback with changes on the variables
-            let _ = Session::run(session);
+    match client.connect_to_endpoint((url.as_ref(),
+                                      SecurityPolicy::None.to_str(),
+                                      MessageSecurityMode::None, UserTokenPolicy::anonymous()),
+                                     IdentityToken::Anonymous) {
+        Ok(session) => {
+            if let Err(result) = subscribe_to_variables(session.clone()) {
+                println!("ERROR: Got an error while subscribing to variables - {}", result);
+            } else { //这种写法清晰么? err return 不更好么
+                // Loops forever. The publish thread will call the callback with changes on the variables
+                let _ = Session::run(session);
+            }
+        }
+        Err(s) => {
+            println!("connect error {}",s)
         }
     }
 }
@@ -50,13 +61,13 @@ fn subscribe_to_variables(session: Arc<RwLock<Session>>) -> Result<(), StatusCod
         println!("Data change from server:");
         changed_monitored_items.iter().for_each(|item| print_value(item));
     }))?;
-    println!("Created a subscription with id = {}", subscription_id);
+    info!("Created a subscription with id = {}", subscription_id);
 
     // Create some monitored items
     let items_to_create: Vec<MonitoredItemCreateRequest> = ["v1", "v2", "v3", "v4"].iter()
         .map(|v|{
          let n=   NodeId::new(2, *v);
-            println!("nodeid={}",n);
+            info!("nodeid={}",n);
          n.into()
         }).collect();
     let _ = session.create_monitored_items(subscription_id, TimestampsToReturn::Both, &items_to_create)?;
@@ -68,8 +79,8 @@ fn print_value(item: &MonitoredItem) {
     let node_id = &item.item_to_monitor().node_id;
     let data_value = item.value();
     if let Some(ref value) = data_value.value {
-        println!("Item \"{}\", Value = {:?}", node_id, value);
+        info!("Item \"{}\", Value = {:?}", node_id, value);
     } else {
-        println!("Item \"{}\", Value not found, error: {}", node_id, data_value.status.as_ref().unwrap());
+        info!("Item \"{}\", Value not found, error: {}", node_id, data_value.status.as_ref().unwrap());
     }
 }

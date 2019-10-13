@@ -227,7 +227,7 @@ impl TcpTransport {
 
                 let thread_id = format!("client-connection-thread-{:?}", thread::current().id());
 //                register_runtime_component!(thread_id.clone());
-                RUNTIME.register_component((thread_id.clone()));
+                RUNTIME.register_component(thread_id.clone());
                 //connection_task不结束是不会返回的
                 tokio::run(connection_task);
                 debug!("Client tokio tasks have stopped for connection");

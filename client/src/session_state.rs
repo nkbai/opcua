@@ -318,14 +318,15 @@ impl SessionState {
             secure_channel.should_renew_security_token()
         };
         if should_renew_security_token {
-            self.issue_or_renew_secure_channel(SecurityTokenRequestType::Renew)
+            //self.issue_or_renew_secure_channel(SecurityTokenRequestType::Renew)
+            Ok(())
         } else {
             Ok(())
         }
     }
 
     pub(crate) fn issue_or_renew_secure_channel(&mut self, request_type: SecurityTokenRequestType) -> Result<(), StatusCode> {
-        trace!("issue_or_renew_secure_channel({:?})", request_type);
+        debug!("issue_or_renew_secure_channel({:?})", request_type);
 
         const REQUESTED_LIFETIME: u32 = 60000; // TODO
 
@@ -335,6 +336,9 @@ impl SessionState {
             secure_channel.set_local_nonce(client_nonce.as_ref());
             (secure_channel.security_mode(), secure_channel.security_policy(), client_nonce)
         };
+//        use backtrace::Backtrace;
+//        let bt = Backtrace::new();
+//        println!("{:?}", bt);
 
         info!("Making secure channel request");
         info!("security_mode = {:?}", security_mode);
