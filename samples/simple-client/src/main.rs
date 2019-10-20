@@ -18,7 +18,7 @@ fn main() {
             .long("url")
             .help("Specify the OPC UA endpoint to connect to")
             .takes_value(true)
-            .default_value("opc.tcp://188.0.0.101:4840")
+            .default_value("opc.tcp://127.0.0.101:4840")
 //            .default_value("opc.tcp://127.0.0.1:4855")
             .required(false))
         .get_matches();

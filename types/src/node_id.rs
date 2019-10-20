@@ -371,7 +371,7 @@ impl NodeId {
 
     /// Extracts an ObjectId from a node id, providing the node id holds an object id
     pub fn as_object_id(&self) -> std::result::Result<ObjectId, ()> {
-        match self.identifier {
+        match self.identifier { //todo clion在这里的分析是错的了
             Identifier::Numeric(id) if self.namespace == 0 => ObjectId::try_from(id),
             _ => Err(())
         }
@@ -416,7 +416,14 @@ impl NodeId {
         }
     }
 }
-
+#[cfg(test)]
+mod tests{
+    use super::*;
+    #[test]
+    fn test_new(){
+        NodeId::new(2,"test");
+    }
+}
 /// A NodeId that allows the namespace URI to be specified instead of an index.
 #[derive(PartialEq, Debug, Clone, Serialize, Deserialize)]
 pub struct ExpandedNodeId {
