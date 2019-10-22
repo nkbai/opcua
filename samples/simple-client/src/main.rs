@@ -18,7 +18,7 @@ fn main() {
             .long("url")
             .help("Specify the OPC UA endpoint to connect to")
             .takes_value(true)
-            .default_value("opc.tcp://188.0.0.101:4840")
+            .default_value("opc.tcp://188.0.0.1:4840")
 //            .default_value("opc.tcp://127.0.0.1:4855")
             .required(false))
         .get_matches();
@@ -95,16 +95,16 @@ fn main() {
 fn subscribe_to_variables(session: Arc<RwLock<Session>>) -> Result<(), StatusCode> {
     let mut session = session.write().unwrap();
     // Creates a subscription with a data change callback 间隔是两秒
-    let subscription_id = session.create_subscription(2000.0, 10, 30, 0, 0, true, DataChangeCallback::new(|changed_monitored_items| {
+    let subscription_id = session.create_subscription(1000.0, 10, 30, 0, 0, true, DataChangeCallback::new(|changed_monitored_items| {
         println!("Data change from server:");
         changed_monitored_items.iter().for_each(|item| print_value(item));
     }))?;
     info!("Created a subscription with id = {}", subscription_id);
 
     // Create some monitored items
-    let items_to_create: Vec<MonitoredItemCreateRequest> = ["v1", "v2", "v3", "v4"].iter()
+    let items_to_create: Vec<MonitoredItemCreateRequest> = ["|var|Chongqing-ARM-Linux.Application.TempGVL.AM10001", "|var|Chongqing-ARM-Linux.Application.TempGVL.AM10002", "|var|Chongqing-ARM-Linux.Application.TempGVL.AM10003", "|var|Chongqing-ARM-Linux.Application.TempGVL.AM10004"].iter()
         .map(|v|{
-         let n=   NodeId::new(2, *v);
+         let n=   NodeId::new(4, *v);
             info!("nodeid={}",n);
          n.into()
         }).collect();
