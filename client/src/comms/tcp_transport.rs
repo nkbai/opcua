@@ -645,7 +645,7 @@ impl TcpTransport {
 
         // Create the message receiver that will drive writes
         let (sender, receiver) = {
-            let mut message_queue  = trace_write_lock_unwrap!(message_queue);
+            let mut message_queue  = message_queue.write().unwrap(); //  trace_write_lock_unwrap!(message_queue);
             message_queue.make_request_channel() //一个session会有多个tcp链接么?
         };
 

@@ -134,7 +134,9 @@ impl MachineCycledEventType {
         event
     }
 }
-
+/*
+不晓得这个raise event啥意思
+*/
 fn raise_machine_cycled_event(address_space: &mut AddressSpace, source_machine_id: &NodeId) {
     // Remove old events
     let now = chrono::Utc::now();

@@ -15,6 +15,7 @@ use tokio_timer::Interval;
 use crate::{
     session_state::SessionState, subscription_state::SubscriptionState,
 };
+use std::sync::RwLockWriteGuard;
 
 #[derive(Clone, Copy, PartialEq)]
 pub(crate) enum SubscriptionTimerCommand {

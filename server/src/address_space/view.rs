@@ -41,8 +41,59 @@ impl Default for View {
     }
 }
 
-node_base_impl!(View);
+//node_base_impl!(View);
+use opcua_types::*;
+use opcua_types::status_code::StatusCode;
+use opcua_types::service_types::NodeClass;
+use crate::address_space::node::NodeType;
+impl Into<NodeType> for View {
+    fn into(self) -> NodeType { NodeType::View(Box::new(self)) }
+}
+impl NodeBase for View {
+    fn node_class(&self) -> NodeClass {
+        self.base.node_class()
+    }
 
+    fn node_id(&self) -> NodeId {
+        self.base.node_id()
+    }
+
+    fn browse_name(&self) -> QualifiedName {
+        self.base.browse_name()
+    }
+
+    fn display_name(&self) -> LocalizedText {
+        self.base.display_name()
+    }
+
+    fn set_display_name(&mut self, display_name: LocalizedText) {
+        self.base.set_display_name(display_name);
+    }
+
+    fn description(&self) -> Option<LocalizedText> {
+        self.base.description()
+    }
+
+    fn set_description(&mut self, description: LocalizedText) {
+        self.base.set_description(description);
+    }
+
+    fn write_mask(&self) -> Option<WriteMask> {
+        self.base.write_mask()
+    }
+
+    fn set_write_mask(&mut self, write_mask: WriteMask) {
+        self.base.set_write_mask(write_mask);
+    }
+
+    fn user_write_mask(&self) -> Option<WriteMask> {
+        self.base.user_write_mask()
+    }
+
+    fn set_user_write_mask(&mut self, user_write_mask: WriteMask) {
+        self.base.set_user_write_mask(user_write_mask)
+    }
+}
 impl Node for View {
     fn get_attribute_max_age(&self, attribute_id: AttributeId, max_age: f64) -> Option<DataValue> {
         match attribute_id {

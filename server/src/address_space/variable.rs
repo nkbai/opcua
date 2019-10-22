@@ -18,9 +18,124 @@ use opcua_types::service_types::VariableAttributes;
 
 // This is a builder object for constructing variable nodes programmatically.
 
-node_builder_impl!(VariableBuilder, Variable);
-node_builder_impl_component_of!(VariableBuilder);
-node_builder_impl_property_of!(VariableBuilder);
+//node_builder_impl!(VariableBuilder, Variable);
+use crate::address_space::{
+    address_space::AddressSpace,
+    references::ReferenceDirection,
+};
+pub struct VariableBuilder {
+    node: Variable,
+    references: Vec<(NodeId, NodeId, ReferenceDirection)>,
+}
+impl VariableBuilder {
+    pub fn new<T, S>(node_id: &NodeId, browse_name: T, display_name: S) -> Self
+        where T: Into<QualifiedName>,
+              S: Into<LocalizedText>,
+    {
+        Self {
+            node: Variable::default(),
+            references: Vec::with_capacity(10),
+        }
+            .node_id(node_id.clone())
+            .browse_name(browse_name)
+            .display_name(display_name)
+    }
+
+    pub fn get_node_id(&self) -> NodeId {
+        self.node.node_id()
+    }
+
+    fn node_id(mut self, node_id: NodeId) -> Self {
+        let _ = self.node.base.set_node_id(node_id);
+        self
+    }
+
+    fn browse_name<V>(mut self, browse_name: V) -> Self where V: Into<QualifiedName> {
+        let _ = self.node.base.set_browse_name(browse_name);
+        self
+    }
+
+    fn display_name<V>(mut self, display_name: V) -> Self where V: Into<LocalizedText> {
+        self.node.set_display_name(display_name.into());
+        self
+    }
+
+
+    pub fn is_valid(&self) -> bool {
+        self.node.is_valid()
+    }
+
+
+    pub fn description<V>(mut self, description: V) -> Self where V: Into<LocalizedText> {
+        self.node.set_description(description.into());
+        self
+    }
+
+
+    pub fn reference<T>(mut self, node_id: T, reference_type_id: ReferenceTypeId, reference_direction: ReferenceDirection) -> Self
+        where T: Into<NodeId>
+    {
+        self.references.push((node_id.into(), reference_type_id.into(), reference_direction));
+        self
+    }
+
+
+    pub fn organizes<T>(self, organizes_id: T) -> Self where T: Into<NodeId> {
+        self.reference(organizes_id, ReferenceTypeId::Organizes, ReferenceDirection::Forward)
+    }
+
+
+    pub fn organized_by<T>(self, organized_by_id: T) -> Self where T: Into<NodeId> {
+        self.reference(organized_by_id, ReferenceTypeId::Organizes, ReferenceDirection::Inverse)
+    }
+
+
+    pub fn build(self) -> Variable {
+        if self.is_valid() {
+            self.node
+        } else {
+            panic!("The node is not valid, node id = {:?}", self.node.base.node_id());
+        }
+    }
+
+
+    pub fn insert(self, address_space: &mut AddressSpace) -> bool {
+        if self.is_valid() {
+            if !self.references.is_empty() {
+                let references = self.references.iter().map(|v| {
+                    (&v.0, &v.1, v.2)
+                }).collect::<Vec<_>>();
+                address_space.insert(self.node, Some(references.as_slice()))
+            } else {
+                address_space.insert::<Variable, ReferenceTypeId>(self.node, None)
+            }
+        } else {
+            panic!("The node is not valid, node id = {:?}", self.node.base.node_id());
+        }
+    }
+}
+
+//node_builder_impl_component_of!(VariableBuilder);
+
+impl VariableBuilder {
+    pub fn component_of<T>(self, component_of_id: T) -> Self where T: Into<NodeId> {
+        self.reference(component_of_id, ReferenceTypeId::HasComponent, ReferenceDirection::Inverse)
+    }
+
+    pub fn has_component<T>(self, has_component_id: T) -> Self where T: Into<NodeId> {
+        self.reference(has_component_id, ReferenceTypeId::HasComponent, ReferenceDirection::Forward)
+    }
+}
+//node_builder_impl_property_of!(VariableBuilder);
+impl VariableBuilder {
+    pub fn has_property<T>(self, has_component_id: T) -> Self where T: Into<NodeId> {
+        self.reference(has_component_id, ReferenceTypeId::HasProperty, ReferenceDirection::Forward)
+    }
+
+    pub fn property_of<T>(self, component_of_id: T) -> Self where T: Into<NodeId> {
+        self.reference(component_of_id, ReferenceTypeId::HasProperty, ReferenceDirection::Inverse)
+    }
+}
 
 impl VariableBuilder {
     /// Sets the value of the variable.
@@ -119,7 +234,7 @@ pub struct Variable {
     historizing: bool,
     value_rank: i32,
     value: DataValue,
-    access_level: u8,
+    access_level: u8,  //很多VariableAttributes中的属性直接移植过来了,没有以VariableAttributes的形式存在
     user_access_level: u8,
     array_dimensions: Option<Vec<u32>>,
     minimum_sampling_interval: Option<f64>,
@@ -147,8 +262,59 @@ impl Default for Variable {
     }
 }
 
-node_base_impl!(Variable);
+//node_base_impl!(Variable);
+use opcua_types::*;
+use opcua_types::status_code::StatusCode;
+use opcua_types::service_types::NodeClass;
+use crate::address_space::node::NodeType;
+impl Into<NodeType> for Variable {
+    fn into(self) -> NodeType { NodeType::Variable(Box::new(self)) }
+}
+impl NodeBase for Variable {
+    fn node_class(&self) -> NodeClass {
+        self.base.node_class()
+    }
 
+    fn node_id(&self) -> NodeId {
+        self.base.node_id()
+    }
+
+    fn browse_name(&self) -> QualifiedName {
+        self.base.browse_name()
+    }
+
+    fn display_name(&self) -> LocalizedText {
+        self.base.display_name()
+    }
+
+    fn set_display_name(&mut self, display_name: LocalizedText) {
+        self.base.set_display_name(display_name);
+    }
+
+    fn description(&self) -> Option<LocalizedText> {
+        self.base.description()
+    }
+
+    fn set_description(&mut self, description: LocalizedText) {
+        self.base.set_description(description);
+    }
+
+    fn write_mask(&self) -> Option<WriteMask> {
+        self.base.write_mask()
+    }
+
+    fn set_write_mask(&mut self, write_mask: WriteMask) {
+        self.base.set_write_mask(write_mask);
+    }
+
+    fn user_write_mask(&self) -> Option<WriteMask> {
+        self.base.user_write_mask()
+    }
+
+    fn set_user_write_mask(&mut self, user_write_mask: WriteMask) {
+        self.base.set_user_write_mask(user_write_mask)
+    }
+}
 impl Node for Variable {
     fn get_attribute_max_age(&self, attribute_id: AttributeId, max_age: f64) -> Option<DataValue> {
         match attribute_id {
@@ -322,6 +488,7 @@ impl Variable {
     pub fn value(&self) -> DataValue {
         if let Some(ref value_getter) = self.value_getter {
             let mut value_getter = value_getter.lock().unwrap();
+            //如果错了怎么办呢?服务器就crash了?
             value_getter.get(&self.node_id(), AttributeId::Value, 0f64).unwrap().unwrap()
         } else {
             self.value.clone().into()

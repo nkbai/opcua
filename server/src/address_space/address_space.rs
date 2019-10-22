@@ -211,8 +211,9 @@ impl AddressSpace {
         }
     }
 
-    /// Finds the namespace index of a given namespace
+    /// Finds the namespace index of a given namespace  //这个是查找vec中位置的方法,用的是position
     pub fn namespace_index(&self, namespace: &str) -> Option<u16> {
+        //这是一个好技巧,position,避免使用for循环
         self.namespaces.iter().position(|ns| {
             let ns: &str = ns.as_ref();
             ns == namespace
@@ -608,7 +609,12 @@ impl AddressSpace {
     /// Find and return a variable with the specified node id or return None if it cannot be
     /// found or is not a variable
     pub fn find_variable_by_ref(&self, node_id: &NodeId) -> Option<&Variable> {
-        find_node!(self, node_id, Variable)
+        self.find_node(node_id).and_then(|node| {
+            match node {
+                NodeType::Variable(ref node) => Some(node.as_ref()),
+                _ => None
+            }
+        })
     }
 
     /// Find and return a variable with the specified node id or return None if it cannot be
@@ -620,7 +626,12 @@ impl AddressSpace {
     /// Find and return a variable with the specified node id or return None if it cannot be
     /// found or is not a variable
     pub fn find_variable_mut_by_ref(&mut self, node_id: &NodeId) -> Option<&mut Variable> {
-        find_node_mut!(self, node_id, Variable)
+        self.find_node_mut(node_id).and_then(|node| {
+            match node {
+                NodeType::Variable(ref mut node) => Some(node.as_mut()),
+                _ => None
+            }
+        })
     }
 
     /// Set a variable value from its NodeId. The function will return false if the variable does

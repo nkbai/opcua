@@ -36,7 +36,9 @@ const SCALAR_TYPES: [DataTypeId; 14] = [
     DataTypeId::Double, DataTypeId::String, DataTypeId::DateTime, DataTypeId::Guid
 ];
 
-
+/*
+生成的是固定的NodeId
+*/
 pub fn scalar_node_id(id: DataTypeId, is_dynamic: bool, is_array: bool) -> NodeId {
     let mut name = scalar_name(id).to_string();
     if is_dynamic {
@@ -152,7 +154,7 @@ fn add_static_array_variables(server: &mut Server, static_folder_id: &NodeId) {
         let values = (0..100).map(|_| scalar_default_value(*sn)).collect::<Vec<Variant>>();
         VariableBuilder::new(&node_id, name, name)
             .data_type(*sn)
-            .value_rank(1)
+            .value_rank(1) //array的rank是1,其他好像没变化
             .value(values)
             .organized_by(&folder_id)
             .insert(&mut address_space);
@@ -202,7 +204,9 @@ fn add_dynamic_array_variables(server: &mut Server, dynamic_folder_id: &NodeId) 
             .insert(&mut address_space);
     });
 }
-
+/*
+简单变量(标量),每250ms变化一次
+*/
 fn set_dynamic_timers(server: &mut Server) {
     let address_space = server.address_space();
 
@@ -243,7 +247,9 @@ pub fn add_stress_variables(server: &mut Server) {
 
     set_stress_timer(server, node_ids);
 }
-
+/*
+100ms 变化一次
+*/
 fn set_stress_timer(server: &mut Server, node_ids: Vec<NodeId>) {
     let address_space = server.address_space();
     server.add_polling_action(100, move || {
