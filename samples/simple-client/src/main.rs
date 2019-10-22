@@ -41,11 +41,49 @@ fn main() {
                                       MessageSecurityMode::None, UserTokenPolicy::anonymous()),
                                      IdentityToken::Anonymous) {
         Ok(session) => {
-            if let Err(result) = subscribe_to_variables(session.clone()) {
-                println!("ERROR: Got an error while subscribing to variables - {}", result);
-            } else { //这种写法清晰么? err return 不更好么
-                // Loops forever. The publish thread will call the callback with changes on the variables
-                let _ = Session::run(session);
+            match subscribe_to_variables(session.clone()) {
+                Err(result) => {
+                    println!("ERROR: Got an error while subscribing to variables - {}", result);
+                }
+                Ok(..) => { //这种写法清晰么? err return 不更好么
+                    // Loops forever. The publish thread will call the callback with changes on the variables
+                    /*
+                    测试读写
+                    */
+                    let cs1state = NodeId::new(4, "|var|Chongqing-ARM-Linux.Application.SystemGVL.CS_1_State");
+                    match session.write().unwrap().read(&[cs1state.clone().into()]){
+                        Err(result)=>{
+                            error!("error read {}",cs1state);
+                        }
+                        Ok(result)=>{
+                            info!("read {} value={:?}",cs1state,result);
+                        }
+                    }
+                    let am601=NodeId::new(4,"|var|Chongqing-ARM-Linux.Application.TempGVL.AM10601");
+                    let am601w=    WriteValue {
+                        node_id: am601.clone(),
+                        attribute_id:AttributeId::Value as u32,
+                        index_range: UAString::null(),
+                        value:DataValue::new(300.0 as f32),
+                    };
+                    match session.write().unwrap().write(&[am601w ]){
+                        Err(result)=>{
+                            error!("error read {}",am601);
+                        }
+                        Ok(result)=>{
+                            info!("read {} value={:?}",am601,result);
+                        }
+                    }
+                    match session.write().unwrap().read(&[am601.clone().into() ]){
+                        Err(result)=>{
+                            error!("error read {}",am601);
+                        }
+                        Ok(result)=>{
+                            info!("read {} value={:?}",am601,result);
+                        }
+                    }
+                    let _ = Session::run(session);
+                }
             }
         }
         Err(s) => {

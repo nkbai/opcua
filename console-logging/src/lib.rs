@@ -20,7 +20,7 @@ pub fn init() {
         // env_logger/RUST_LOG is used by cargo and other rust tools so console fills with garbage from
         // other processes  when we're only interested in our own garbage!
         let mut builder = Builder::from_env("RUST_OPCUA_LOG");
-        builder.filter_level(LevelFilter::Debug);
+        builder.filter_level(LevelFilter::Info);
         builder.format(|buf, record| {
             let now = chrono::Utc::now();
             let time_fmt = now.format("%Y-%m-%d %H:%M:%S%.3f");

@@ -328,7 +328,7 @@ impl SessionState {
     pub(crate) fn issue_or_renew_secure_channel(&mut self, request_type: SecurityTokenRequestType) -> Result<(), StatusCode> {
         debug!("issue_or_renew_secure_channel({:?})", request_type);
 
-        const REQUESTED_LIFETIME: u32 = 60000; // TODO
+        const REQUESTED_LIFETIME: u32 = 3600000; // TODO 默认一个小时,可调整
 
         let (security_mode, security_policy, client_nonce) = {
             let mut secure_channel = trace_write_lock_unwrap!(self.secure_channel);

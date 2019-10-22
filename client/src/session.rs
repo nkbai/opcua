@@ -1557,7 +1557,7 @@ impl Session {
             {
                 let mut session_state = trace_write_lock_unwrap!(self.session_state);
                 items_to_create.iter_mut().for_each(|i| {
-                    i.requested_parameters.client_handle = session_state.next_monitored_item_handle();
+                    i.requested_parameters.client_handle = session_state.next_monitored_item_handle(); //这是临时编号
                 });
             }
 

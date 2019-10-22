@@ -45,7 +45,7 @@ impl ServiceFault {
 impl UserTokenPolicy {
     pub fn anonymous() -> UserTokenPolicy {
         UserTokenPolicy {
-            policy_id: UAString::from("anonymous"),
+            policy_id: UAString::from("Anonymous"), //todo 大小写
             token_type: UserTokenType::Anonymous,
             issued_token_type: UAString::null(),
             issuer_endpoint_url: UAString::null(),

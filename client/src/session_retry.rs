@@ -51,7 +51,7 @@ impl SessionRetryPolicy {
     /// The minimum retry interval
     pub const MIN_RETRY_INTERVAL_MS: u32 = 500;
     /// The default session timeout interval in millis
-    pub const DEFAULT_SESSION_TIMEOUT_MS: f64 = std::f64::MAX;
+    pub const DEFAULT_SESSION_TIMEOUT_MS: f64 = 1200000.0; //  std::f64::MAX;
 
     /// Create a `SessionRetryPolicy` with a limit and interval
     pub fn new(session_timeout: f64, retry_limit: u32, retry_interval: u32) -> Self {
