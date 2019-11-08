@@ -637,7 +637,11 @@ impl TryFrom<u32> for DataTypeId {
         }
     }
 }
-
+#[test]
+fn test_convert(){
+    let t=DataTypeId::try_from(3);
+    println!("{:?}",t.unwrap());
+}
 #[allow(non_camel_case_types)]
 #[derive(Debug, PartialEq, Eq, Copy, Clone, Hash)]
 pub enum ReferenceTypeId {

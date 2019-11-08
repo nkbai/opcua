@@ -1,6 +1,6 @@
 use rand::Rng;
 use rand::distributions::Alphanumeric;
-
+use crate::log::*;
 use opcua_server::{
     prelude::*,
 };
@@ -243,6 +243,7 @@ pub fn add_stress_variables(server: &mut Server) {
             .value(0i32)
             .organized_by(&folder_id)
             .insert(&mut address_space);
+        warn!("insert stress {}",node_id);
     });
 
     set_stress_timer(server, node_ids);
@@ -252,7 +253,7 @@ pub fn add_stress_variables(server: &mut Server) {
 */
 fn set_stress_timer(server: &mut Server, node_ids: Vec<NodeId>) {
     let address_space = server.address_space();
-    server.add_polling_action(100, move || {
+    server.add_polling_action(1000, move || {
         let mut rng = rand::thread_rng();
         let mut address_space = address_space.write().unwrap();
         let now = DateTime::now();

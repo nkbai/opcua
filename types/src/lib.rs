@@ -45,7 +45,7 @@ pub mod constants {
     /// implicitly in opc.tcp:// urls and elsewhere.
     pub const DEFAULT_OPC_UA_SERVER_PORT: u16 = 4840;
     /// Maximum number of elements in an array
-    pub const MAX_ARRAY_LENGTH: usize = 1000;
+    pub const MAX_ARRAY_LENGTH: usize = 100000; //采样点个数可能会有几万个
     /// Maximum size of a string in chars
     pub const MAX_STRING_LENGTH: usize = 65536;
     /// Maximum size of a byte string in bytes

@@ -251,8 +251,10 @@ impl Subscription {
     pub(crate) fn data_change(&mut self, data_change_notifications: &[DataChangeNotification]) {
         let mut monitored_item_ids = HashSet::new();
         for n in data_change_notifications {
+            debug!("sub get data_change_notifications len={}",data_change_notifications.len());
             if let Some(ref monitored_items) = n.monitored_items {
                 for i in monitored_items {
+                    debug!("data_change monitored_items ={} ,value={:?}",i.client_handle,i.value);
                     let monitored_item_id = {
                         let monitored_item_id = self.monitored_item_id_from_handle(i.client_handle);
                         if monitored_item_id.is_none() {

@@ -171,11 +171,8 @@ impl Session {
     ///
     pub fn connect_and_activate(&mut self) -> Result<(), StatusCode> {
         // Connect now using the session state
-        info!("connect start.");
         self.connect()?;
-        info!("create session.");
         self.create_session()?;
-        info!("activate_session.");
         self.activate_session()?;
         Ok(())
     }
@@ -377,7 +374,7 @@ impl Session {
         loop {
             match self.connect_no_retry() {
                 Ok(_) => {
-                    info!("Connect was successful");
+//                    info!("Connect was successful");
                     self.session_retry_policy.reset_retry_count();
                     return Ok(());
                 }
@@ -428,8 +425,8 @@ impl Session {
                 secure_channel.set_security_policy(security_policy);
                 secure_channel.set_security_mode(self.session_info.endpoint.security_mode);
                 let _ = secure_channel.set_remote_cert_from_byte_string(&self.session_info.endpoint.server_certificate);
-                info!("Security policy = {:?}", security_policy);
-                info!("Security mode = {:?}", self.session_info.endpoint.security_mode);
+//                info!("Security policy = {:?}", security_policy);
+//                info!("Security mode = {:?}", self.session_info.endpoint.security_mode);
             }
             self.transport.connect(endpoint_url.as_ref())?;
             self.open_secure_channel()?;
@@ -1543,7 +1540,7 @@ impl Session {
     /// [`MonitoredItemCreateResult`]: ./struct.MonitoredItemCreateResult.html
     ///
     pub fn create_monitored_items(&mut self, subscription_id: u32, timestamps_to_return: TimestampsToReturn, items_to_create: &[MonitoredItemCreateRequest]) -> Result<Vec<MonitoredItemCreateResult>, StatusCode> {
-        debug!("create_monitored_items, for subscription {}, {} items", subscription_id, items_to_create.len());
+        info!("create_monitored_items, for subscription {}, {} items", subscription_id, items_to_create.len());
         if subscription_id == 0 {
             error!("create_monitored_items, subscription id 0 is invalid");
             Err(StatusCode::BadInvalidArgument)
@@ -1559,7 +1556,9 @@ impl Session {
             {
                 let mut session_state = trace_write_lock_unwrap!(self.session_state);
                 items_to_create.iter_mut().for_each(|i| {
-                    i.requested_parameters.client_handle = session_state.next_monitored_item_handle(); //这是临时编号
+                    if i.requested_parameters.client_handle==0{
+                        i.requested_parameters.client_handle = session_state.next_monitored_item_handle(); //这是临时编号,todo 这里无条件覆盖了,所以我社不设置都没有用
+                    }
                 });
             }
 
@@ -1573,7 +1572,7 @@ impl Session {
             if let SupportedMessage::CreateMonitoredItemsResponse(response) = response {
                 crate::process_service_result(&response.response_header)?;
                 if let Some(ref results) = response.results {
-                    debug!("create_monitored_items, {} items created", items_to_create.len());
+                    info!("create_monitored_items, {} items created", items_to_create.len());
                     // Set the items in our internal state
                     let items_to_create = items_to_create.iter()
                         .zip(results)
@@ -1594,7 +1593,7 @@ impl Session {
                         subscription_state.insert_monitored_items(subscription_id, &items_to_create);
                     }
                 } else {
-                    debug!("create_monitored_items, success but no monitored items were created");
+                    info!("create_monitored_items, success but no monitored items were created");
                 }
                 Ok(response.results.unwrap())
             } else {
@@ -2300,11 +2299,11 @@ impl Session {
     /// responses. It maintains the acknowledgements to be sent and sends the data change
     /// notifications to the client for processing.
     fn handle_async_response(&mut self, response: SupportedMessage) {
-        debug!("handle_publish_response");
+        info!("handle_publish_response");
         let mut wait_for_publish_response = false;
         match response {
             SupportedMessage::PublishResponse(response) => {
-                debug!("PublishResponse");
+                info!("PublishResponse");
 
                 // Update subscriptions based on response
                 // Queue acknowledgements for next request

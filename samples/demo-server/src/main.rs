@@ -3,7 +3,8 @@
 //!
 //! Use simple-server to understand a terse and simple example.
 use std::path::PathBuf;
-
+#[macro_use]
+extern crate log;
 #[macro_use]
 extern crate lazy_static;
 
@@ -17,8 +18,9 @@ mod machine;
 mod scalar;
 
 fn main() {
+    opcua_console_logging::init();
     // More powerful logging than a console logger
-    log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
+//    log4rs::init_file("log4rs.yaml", Default::default()).unwrap();
 
     // Create an OPC UA server with sample configuration and default node set
     let mut server = Server::new(ServerConfig::load(&PathBuf::from("../server.conf")).unwrap());
