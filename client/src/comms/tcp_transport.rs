@@ -44,9 +44,13 @@ use crate::{
 
 macro_rules! connection_state {( $s:expr ) => { *trace_read_lock_unwrap!($s) } }
 macro_rules! set_connection_state {( $s:expr, $v:expr ) => { *trace_write_lock_unwrap!($s) = $v } }
-
+/**
+ReadState主要是用于依据SecureChannel,验证并去除所有加密相关信息
+然后放入MessageQueue中
+*/
 struct ReadState {
     pub state: Arc<RwLock<ConnectionState>>,
+    //共享的连接状态,读写不同的线程做这个事情
     pub secure_channel: Arc<RwLock<SecureChannel>>,
     pub message_queue: Arc<RwLock<MessageQueue>>,
     /// Last decoded sequence number
@@ -71,7 +75,7 @@ impl ReadState {
     fn process_chunk(&mut self, chunk: MessageChunk) -> Result<Option<SupportedMessage>, StatusCode> {
         // trace!("Got a chunk {:?}", chunk);
         let (chunk, decoding_limits) = {
-            let mut secure_channel =  trace_write_lock_unwrap!(self.secure_channel);
+            let mut secure_channel = trace_write_lock_unwrap!(self.secure_channel);
             (secure_channel.verify_and_remove_security(&chunk.data)?, secure_channel.decoding_limits())
         };
         let message_header = chunk.message_header(&decoding_limits)?;
@@ -424,7 +428,10 @@ impl TcpTransport {
     1. 处理连接状态
     2. 收到的应答消息放入到message_queue中,通过 message_queue.store_response
     */
-    fn spawn_reading_task(reader: ReadHalf<WrappedTcpStream>, writer_tx: UnboundedSender<message_queue::Message>, finished_flag: Arc<RwLock<bool>>, _receive_buffer_size: usize, connection: ReadState, id: u32) {
+    fn spawn_reading_task(reader: ReadHalf<WrappedTcpStream>,
+                          writer_tx: UnboundedSender<message_queue::Message>,
+                          finished_flag: Arc<RwLock<bool>>, _receive_buffer_size: usize,
+                          connection: ReadState, id: u32) {
         // This is the main processing loop that receives and sends messages
         let decoding_limits = {
             let secure_channel = trace_read_lock_unwrap!(connection.secure_channel);
@@ -449,7 +456,7 @@ impl TcpTransport {
         以message为单位收消息
         */
         let looping_task = framed_reader.for_each(move |message| {
-            let mut connection = connection.write().unwrap(); //  trace_write_lock_unwrap!(connection);
+            let mut connection = trace_write_lock_unwrap!(connection);
             let mut session_status_code = StatusCode::Good;
             match message {
                 /*
@@ -471,14 +478,15 @@ impl TcpTransport {
                         session_status_code = StatusCode::BadUnexpectedError;
                     } else {
                         let result = connection.process_chunk(chunk);
-                        match result{
-                            Err(e)=> session_status_code=e,
-                            Ok(Some(response))=>{
+                        match result {
+                            Err(e) => session_status_code = e,
+                            Ok(Some(response)) => {
+                                trace!("receive message {:?}", response);
                                 // Store the response
-                                let mut message_queue = connection.message_queue.write().unwrap(); //  trace_write_lock_unwrap!(connection.message_queue);
+                                let mut message_queue = trace_write_lock_unwrap!(connection.message_queue);
                                 message_queue.store_response(response);
                             }
-                            Ok(None)=>{
+                            Ok(None) => {
                                 //什么都处理,消息不完整
                             }
                         }
@@ -583,8 +591,9 @@ impl TcpTransport {
                     message_queue::Message::Quit => panic!(),
                     message_queue::Message::SupportedMessage(request) => request
                 };
+                trace!("send message {:?}", request);
                 let close_connection = {
-                    let mut connection =connection.lock().unwrap();  // trace_lock_unwrap!(connection);
+                    let mut connection = connection.lock().unwrap();  // trace_lock_unwrap!(connection);
                     let state = connection_state!(connection.state);
                     if state == ConnectionState::Processing {
                         trace! {"Sending Request"};
@@ -639,19 +648,19 @@ impl TcpTransport {
     fn spawn_looping_tasks(reader: ReadHalf<WrappedTcpStream>, writer: WriteHalf<WrappedTcpStream>, connection_state: Arc<RwLock<ConnectionState>>, session_state: Arc<RwLock<SessionState>>, secure_channel: Arc<RwLock<SecureChannel>>, message_queue: Arc<RwLock<MessageQueue>>) {
         let (receive_buffer_size, send_buffer_size, id) = {
             //加锁范围要尽可能小
-            let session_state = session_state.read().unwrap(); //  trace_read_lock_unwrap!(session_state);
+            let session_state = trace_read_lock_unwrap!(session_state);
             (session_state.receive_buffer_size(), session_state.send_buffer_size(), session_state.id())
         };
 
         // Create the message receiver that will drive writes
         let (sender, receiver) = {
-            let mut message_queue  = message_queue.write().unwrap(); //  trace_write_lock_unwrap!(message_queue);
+            let mut message_queue = trace_write_lock_unwrap!(message_queue);
             message_queue.make_request_channel() //一个session会有多个tcp链接么?
         };
 
         // At this stage, the HEL has been sent but the ACK has not been received
 //        set_connection_state!(connection_state, ConnectionState::WaitingForAck);
-        *(connection_state).write().unwrap()=ConnectionState::WaitingForAck;
+        *(connection_state).write().unwrap() = ConnectionState::WaitingForAck;
         // Abort monitor
         let finished_flag = Arc::new(RwLock::new(false));
         Self::spawn_finished_monitor_task(connection_state.clone(), finished_flag.clone(), id);

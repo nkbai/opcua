@@ -22,7 +22,7 @@ pub fn init() {
         let mut builder = Builder::from_env("RUST_OPCUA_LOG");
         builder.filter_level(LevelFilter::Info);
         builder.format(|buf, record| {
-            let now = chrono::Utc::now();
+            let now = chrono::Local::now();
             let time_fmt = now.format("%Y-%m-%d %H:%M:%S%.3f");
 
             let mut style = buf.style();

@@ -21,10 +21,37 @@ pub struct CreateSessionRequest {
     pub request_header: RequestHeader,
     pub client_description: ApplicationDescription,
     pub server_uri: UAString,
+    /*
+    The network address that the Client used to access the Session Endpoint.
+    The HostName portion of the URL should be one of the HostNames for the
+    application that are specified in the Server’s ApplicationInstanceCertificate (see
+    Cause 7.2). The Server shall raise an AuditUrlMismatchEventType event if the URL
+    does not match the Server’s HostNames. AuditUrlMismatchEventType event type is
+    defined in Part 5.
+    The Server uses this information for diagnostics and to determine the set of
+    EndpointDescriptions to return in the response.
+    */
     pub endpoint_url: UAString,
+    /*
+    Human readable string that identifies the Session. The Server makes this name and
+    the sessionId visible in its AddressSpace for diagnostic purposes. The Client should
+    provide a name that is unique for the instance of the Client.
+    If this parameter is not specified the Server shall assign a value
+    */
     pub session_name: UAString,
+    /*
+    A random number that should never be used in any other request. This number shall
+have a minimum length of 32 bytes. Profiles may increase the required length. The
+Server shall use this value to prove possession of its application instance Certificate
+in the response.
+    */
     pub client_nonce: ByteString,
     pub client_certificate: ByteString,
+    /*
+    Actual maximum number of milliseconds that a Session shall remain open without
+    activity. The Server should attempt to honour the Client request for this parameter,
+    but may negotiate this value up or down to meet its own constraints.
+    */
     pub requested_session_timeout: f64,
     pub max_response_message_size: u32,
 }

@@ -7,6 +7,8 @@ use opcua_types::*;
 这个单纯就是一个管理消息发送与接收的辅助结构
 记录发送,
 收到以后交到这里,如果是没有对应的发送消息,会被丢弃
+对于有对应发送消息的存下来,等待使用的人来取,
+消息分为两大类: 异步消息和非异步消息
 */
 pub(crate) struct MessageQueue {
     /// The requests that are in-flight, defined by their request handle and an async flag. Basically,
@@ -39,7 +41,7 @@ impl MessageQueue {
     }
 
     // Creates the transmission queue that outgoing requests will be sent over
-    //todo 这个api 感觉设计的并不合理,可能会反复创建sender,receiver,是没必要的,应该是初始化的时候就够早好
+    //todo 这个api 感觉设计的并不合理,可能会反复创建sender,receiver,是没必要的,应该是初始化的时候就构造好
     /// 自己保留了一份sender用于发送正常消息,返回的则是用于其他人发送退出信号
     pub(crate) fn make_request_channel(&mut self) -> (UnboundedSender<Message>, UnboundedReceiver<Message>) {
         let (tx, rx) = mpsc::unbounded::<Message>();
@@ -55,6 +57,7 @@ impl MessageQueue {
         if let Err(err) = self.sender.as_ref().unwrap().unbounded_send(message) {
             debug!("Cannot sent message to message receiver, error = {:?}", err);
         }
+        trace!("send_message unbounded_send complete");
     }
 
     /// Called by the session to add a request to be sent

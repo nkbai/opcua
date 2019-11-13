@@ -23,10 +23,12 @@ use crate::address_space::{
     address_space::AddressSpace,
     references::ReferenceDirection,
 };
+
 pub struct VariableBuilder {
     node: Variable,
     references: Vec<(NodeId, NodeId, ReferenceDirection)>,
 }
+
 impl VariableBuilder {
     pub fn new<T, S>(node_id: &NodeId, browse_name: T, display_name: S) -> Self
         where T: Into<QualifiedName>,
@@ -126,6 +128,7 @@ impl VariableBuilder {
         self.reference(has_component_id, ReferenceTypeId::HasComponent, ReferenceDirection::Forward)
     }
 }
+
 //node_builder_impl_property_of!(VariableBuilder);
 impl VariableBuilder {
     pub fn has_property<T>(self, has_component_id: T) -> Self where T: Into<NodeId> {
@@ -230,13 +233,45 @@ impl VariableBuilder {
 #[derivative(Debug)]
 pub struct Variable {
     base: Base,
+    /**
+    数据类型表示为地址空间中的节点。 此属性包含一个-
+    这种节点的N“eld,从而定义了 Value属性的数据类型
+    */
     data_type: NodeId,
+    /**
+    指示服务器目前是杏收集了 Vau的历史。 AccewLeveJ
+    属性不提供这些信息， 它仅指定是否有历史可用
+    */
     historizing: bool,
+    /**
+    标识值是否是一个数组， 如果它是一个数组， 它允许
+    指定数组的维度
+    */
     value_rank: i32,
+    /**
+    变量的实际值。 该值的数据类型由DataType、ValueRank和AnayDimensions 厲性指定
+    */
     value: DataValue,
-    access_level: u8,  //很多VariableAttributes中的属性直接移植过来了,没有以VariableAttributes的形式存在
+    /**
+一个位掩码Vdue属性的当前值是否可读可写， 以及
+Vdue的历史是否可读和可改变
+*/
+    access_level: u8,
+    ///与AccesLevd包含相同的信息， 但需耍考虑到用户的
+    ///访问权限
     user_access_level: u8,
+    /**
+    这个可选属性允许指定数组的大小， 只能在值是一个数组
+    时使用。 对尸数组的每一个维数对应的条目定义维度的长度
+    */
     array_dimensions: Option<Vec<u32>>,
+    /**
+    这个可选属性提供信息指明OPC UA服务器需耍多长
+    时间能检测到va”厲性的变化。 对于服务器不直接管理
+    的值， 例如， 一个遐度传感器的温度.服务器可能需要
+    扫描设备变化（轮询〉 ， 因此无法比最小时间间隔更快检
+    測到变化
+    */
     minimum_sampling_interval: Option<f64>,
     #[derivative(Debug = "ignore")]
     value_setter: Option<Arc<Mutex<dyn AttributeSetter + Send>>>,
@@ -267,9 +302,11 @@ use opcua_types::*;
 use opcua_types::status_code::StatusCode;
 use opcua_types::service_types::NodeClass;
 use crate::address_space::node::NodeType;
+
 impl Into<NodeType> for Variable {
     fn into(self) -> NodeType { NodeType::Variable(Box::new(self)) }
 }
+
 impl NodeBase for Variable {
     fn node_class(&self) -> NodeClass {
         self.base.node_class()
@@ -315,6 +352,7 @@ impl NodeBase for Variable {
         self.base.set_user_write_mask(user_write_mask)
     }
 }
+
 impl Node for Variable {
     fn get_attribute_max_age(&self, attribute_id: AttributeId, max_age: f64) -> Option<DataValue> {
         match attribute_id {

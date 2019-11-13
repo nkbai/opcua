@@ -185,7 +185,7 @@ impl Client {
 
         {
             // Connect to the server
-            let mut session = session.write().unwrap();
+            let mut session = trace_write_lock_unwrap!( session);
             if let Err(result) = session.connect_and_activate() {
                 error!("Got an error while creating the default session - {}", result.description());
             }
@@ -214,7 +214,7 @@ impl Client {
 
         {
             // Connect to the server
-            let mut session = session.write().unwrap();
+            let mut session = trace_write_lock_unwrap!( session);
             if let Err(result) = session.connect_and_activate() {
                 error!("Got an error while creating the default session - {}", result.description());
                 return Err(result);
@@ -385,7 +385,7 @@ impl Client {
         let session = self.new_session_from_info(endpoint);
         match session {
             Ok(session) => {
-                let mut session =  session.write().unwrap(); //  trace_write_lock_unwrap!(session);
+                let mut session =   trace_write_lock_unwrap!(session);
                 // Connect & activate the session.
                 let connected = session.connect();
                 if connected.is_ok() {

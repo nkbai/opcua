@@ -18,8 +18,8 @@ use crate::{
 pub struct Argument {
     pub name: UAString,
     pub data_type: NodeId,
-    pub value_rank: i32,
-    pub array_dimensions: Option<Vec<u32>>,
+    pub value_rank: i32, //标识参数是标量、 数组还是矩阵
+    pub array_dimensions: Option<Vec<u32>>, //可选， 定义数组或矩阵的大小
     pub description: LocalizedText,
 }
 

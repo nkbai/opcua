@@ -305,7 +305,7 @@ impl Session {
                 info!("Recreating subscription {}", subscription_id);
                 // Remove the subscription data, create it again from scratch
                 let deleted_subscription = {
-                    let mut subscription_state = subscription_state.write().unwrap(); // trace_write_lock_unwrap!(subscription_state);
+                    let mut subscription_state =  trace_write_lock_unwrap!(subscription_state);
                     subscription_state.delete_subscription(*subscription_id)
                 };
 
@@ -523,7 +523,7 @@ impl Session {
     fn run_loop(session: Arc<RwLock<Session>>, sleep_interval: u64, rx: mpsc::Receiver<SessionCommand>) {
         loop {
             // Main thread has nothing to do - just wait for publish events to roll in
-            let mut session = session.write().unwrap();
+            let mut session = trace_write_lock_unwrap!( session);
             if rx.try_recv().is_ok() {
                 info!("Run session was terminated by a message");
                 break;
@@ -883,7 +883,7 @@ impl Session {
         let session_activity_interval = Duration::from_millis(session_activity);
         let task = Interval::new(Instant::now(), Duration::from_millis(MIN_SESSION_ACTIVITY_MS))
             .take_while(move |_| {
-                let connection_state =connection_state_take_while.read().unwrap(); //  trace_read_lock_unwrap!(connection_state_take_while);
+                let connection_state = trace_read_lock_unwrap!(connection_state_take_while);
                 let terminated = match *connection_state {
                     ConnectionState::Finished(_) => true,
                     _ => false
@@ -899,7 +899,7 @@ impl Session {
                 let interval = now - *last_timeout;
                 if interval > session_activity_interval {
                     let connection_state = {
-                        let connection_state :RwLockReadGuard<ConnectionState>= connection_state_for_each.read().unwrap(); // trace_read_lock_unwrap!(connection_state_for_each);
+                        let connection_state :RwLockReadGuard<ConnectionState>=  trace_read_lock_unwrap!(connection_state_for_each);
                         *connection_state
                     };
                     match connection_state {
@@ -2299,7 +2299,7 @@ impl Session {
     /// responses. It maintains the acknowledgements to be sent and sends the data change
     /// notifications to the client for processing.
     fn handle_async_response(&mut self, response: SupportedMessage) {
-        info!("handle_publish_response");
+        trace!("handle_publish_response");
         let mut wait_for_publish_response = false;
         match response {
             SupportedMessage::PublishResponse(response) => {
